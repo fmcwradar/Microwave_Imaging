@@ -34,7 +34,7 @@ antenna_counter = 0
 antenna_distance = 10   #Difference between the center positions of TX and RX antenna.
 
 #Dynamic range of the image (dB).
-dynamic_range = 30
+dynamic_range = 15
 
 #Iterate over antenna positions.
 for antenna_x in antenna_positions:
@@ -84,7 +84,10 @@ for antenna_x in antenna_positions:
         print('Warning: f_0 divided by frequency step is not an integer value.')
     Nu = int(Nu)
 
-    Spad = Sf
+    Spad = np.hstack((np.zeros(Nu), Sf))
+
+    #Calculate the IFFT. Attention: It is important that the result of the IFFT is a complex signal. Otherwise the phase information will be lost.
+    Stp = np.fft.ifft(Spad, n=nPad)
 
     #Calculate the IFFT. Attention: It is important that the result of the IFFT is a complex signal. Otherwise the phase information will be lost.
     Stp = np.fft.ifft(Spad, n=nPad)
@@ -124,7 +127,7 @@ image_matrix = image_matrix**2
 #Normalize.
 image_matrix_norm = image_matrix/np.max(np.abs(image_matrix))
 
-ax = sns.heatmap(10*np.log10(np.abs(image_matrix_norm)), cbar = True, cmap = 'jet',square = True, vmax = 0, vmin = -dynamic_range)   
+ax = sns.heatmap(10*np.log10(np.abs(image_matrix_norm)), cbar = True, cmap = 'jet',square = True, vmax = 0, vmin = -dynamic_range, cbar_kws={'label': 'Normalized Intensity (dB)'})   
 
 x_ticks = np.flip(np.round(np.linspace(start_x, end_x, int(np.round((np.abs(end_x)+np.abs(start_x))/2,0)+1)),1))
 x_ticks_location = np.linspace(0, len(x_axis), int(np.round((np.abs(end_x)+np.abs(start_x))/2,0)+1))
