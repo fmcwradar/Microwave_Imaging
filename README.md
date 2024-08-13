@@ -10,4 +10,4 @@ To compute an image based on a set of s-parameter measurements it is necessary t
 
 ## Imaging with FMCW Radar
 
-For the image generation with the FMCW radar system you have to run two files. First, the file 
+For the image generation with the FMCW radar system you have to run two files. First, the file `Prepare_Radar_Data.py` and then the file `Bildgebung_FMCW_Radar_MM.py`.
