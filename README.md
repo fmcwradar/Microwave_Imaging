@@ -4,6 +4,8 @@ In this repository you can find python scripts for microwave imaging using a vec
 
 The FMCW radar system is realized with commercially available components. More details can be found in my publications (https://ieeexplore.ieee.org/document/10305102) and (https://ieeexplore.ieee.org/document/10590586).
 
+As a VNA I used the E8361C from Keysight.
+
 For the imaging with the vector network analyzer the delay-and-sum (DAS) beamforming algorithm is implemented. For the FMCW radar system the standard synthetic aperture radar (SAR) approach is used. However, both algorithms are ultimatively just the application of a matched filter.
 
 ## Imaging with VNA
