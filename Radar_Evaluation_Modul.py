@@ -17,7 +17,7 @@ class radar_measurement_evaluation:
     def getdata(self,swap_IQ = True):
     
         #Reads the data from the .csv-file. The .csv-file contains the time, I and Q.
-        #If swap_IQ = True then I and Q are swapped.
+        #If swap_IQ = True then I and Q are swapped. This is necessary if IF-I is connected to Channel 2 of the oscilloscope and IF-Q to Channel 1.
       
         swap_IQ = True
       
