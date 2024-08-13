@@ -11,3 +11,5 @@ To compute an image based on a set of s-parameter measurements it is necessary t
 ## Imaging with FMCW Radar
 
 For the image generation with the FMCW radar system you have to run two files. First, the file `Prepare_Radar_Data.py` and then the file `Imaging_FMCW_Radar.py`.
+
+`Prepare_Radar_Data.py` computes the range FFT of every measurement and combines them in a matrix. This matrix and the corresponding distance vector is saves in two pickle files `spectrum.pkl` and `distance_corrected.pkl`.
