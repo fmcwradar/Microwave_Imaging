@@ -12,4 +12,4 @@ To compute an image based on a set of s-parameter measurements it is necessary t
 
 For the image generation with the FMCW radar system you have to run two files. First, the file `Prepare_Radar_Data.py` and then the file `Imaging_FMCW_Radar.py`.
 
-`Prepare_Radar_Data.py` computes the range FFT of every measurement and combines them in a matrix. This matrix and the corresponding distance vector is saved in two pickle files `spectrum.pkl` and `distance_corrected.pkl`. For this, it is necessary that there is a folder name 'Pickle Files' in the directory.
+`Prepare_Radar_Data.py` computes the range FFT of every measurement and combines them in a matrix. This matrix and the corresponding distance vector is saved in two pickle files `spectrum.pkl` and `distance_corrected.pkl`. For this, it is necessary that there is a folder name 'Pickle Files' in the directory. `Imaging_FMCW_Radar.py` then calculates the image based on `spectrum.pkl` and `distance_corrected.pkl`. 
