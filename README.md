@@ -1,6 +1,6 @@
 # Radar_Signal_Processing
 
-This is a from scratch pure python implementation of the fast relaxed vectorfitting algorithm for MIMO frequency domain data. Different modes (standard VF, relaxed VF and fast relaxed VF) are implemented. Matrix shaped frequency domain data is supported, and a model with common poles is fitted
+In this repository you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency modulated continuous wave (FMCW) radar system.
 
 ```math
 \mathbf{H}_{fit}(s) = \mathbf{D} + s \cdot \mathbf{E} + \mathbf{Z} \cdot \frac{1}{s} + \sum_{k=1}^{n} \mathbf{R}_{k} \cdot \frac{1}{s - p_k}
