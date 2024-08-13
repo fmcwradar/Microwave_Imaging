@@ -6,7 +6,7 @@ For the imaging with the vector network analyzer the delay-and-sum (DAS) beamfor
 
 ## Imaging with VNA
 
-The example shows the fitting of 3-port s-parameters of an RF inductor with center tap. The s-parameters are imported directly from the `s3p` touchstone file.
+To compute an image based on a set of s-parameter measurements it is necessary that you have a folder with the corresponding `.s2p` touchstone files.
 
 ## Imaging with FMCW Radar
 
