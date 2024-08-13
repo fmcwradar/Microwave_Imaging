@@ -2,6 +2,8 @@ import os
 import pickle 
 import numpy as np
 
+print("Hallo")
+
 def load_data(use_test_data,increment,current_dir):
     
     if use_test_data == 0:
