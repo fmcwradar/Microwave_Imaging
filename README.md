@@ -16,3 +16,9 @@ For the image generation with the FMCW radar system you have to run two files. F
 
 ## Getting Started
 For both VNA and FMCW radar imaging exemplary measurement data can be found in the folder 'Exemplary Measurement Data'.
+
+## What else?
+If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de
+
+Hope you enjoy the images!
+
