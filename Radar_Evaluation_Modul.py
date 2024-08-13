@@ -19,14 +19,16 @@ class radar_measurement_evaluation:
         #Reads the data from the .csv-file. The .csv-file contains the time, I and Q.
         #If swap_IQ = True then I and Q are swapped.
       
+        swap_IQ = True
+      
         filepath = str(r"{0}\{1}.csv".format(self.path,self.name))
         columns = ['time','I','Q']
         
         data = read_csv(filepath,names=columns)
         
         time =  np.array(data['time'].tolist())
-        Q = np.array(data['I'].tolist())
-        I = np.array(data['Q'].tolist())
+        I = np.array(data['I'].tolist())
+        Q = np.array(data['Q'].tolist())
          
         if swap_IQ == True:
             I = np.array(data['Q'].tolist())
