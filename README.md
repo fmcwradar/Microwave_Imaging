@@ -10,4 +10,4 @@ To compute an image based on a set of s-parameter measurements it is necessary t
 
 ## Imaging with FMCW Radar
 
-The example shows the fitting of 3-port s-parameters of an RF inductor with center tap. The s-parameters are imported directly from the `s3p` touchstone file.
+For the image generation with the FMCW radar system you have to run two files. First, the file 
