@@ -174,7 +174,7 @@ class radar_measurement_evaluation:
 
         spectrum_down = np.fft.fft(padded_signal, norm = 'forward')
         
-        spectrum_down_corr = spectrum_down*1
+        spectrum_down_corr = spectrum_down*np.exp(-1j*compensation_term)
         
         self.signal_down = mean_value_down_final
         self.spectrum_down = spectrum_down_corr
