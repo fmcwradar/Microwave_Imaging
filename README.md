@@ -1,4 +1,4 @@
-# Vectorfitting
+# Radar_Signal_Processing
 
 This is a from scratch pure python implementation of the fast relaxed vectorfitting algorithm for MIMO frequency domain data. Different modes (standard VF, relaxed VF and fast relaxed VF) are implemented. Matrix shaped frequency domain data is supported, and a model with common poles is fitted
 
