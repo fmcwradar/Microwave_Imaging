@@ -6,8 +6,8 @@ For the imaging with the vector network analyzer the delay-and-sum (DAS) beamfor
 
 ## Imaging with VNA
 
-To compute an image based on a set of s-parameter measurements it is necessary that you have a folder with the corresponding `.s2p` touchstone files. A separate touchstone file is required for every antenna position. The name of the file indicates the measurement number, e.g. `0.s2p`, `1.s2p`, `2.s2p` and so on. To generate the image, it is necessary to run the script `Bildgebung_VNA_MM.py`. In the variable 'path' you just have to specfiy the folder with your touchstone files.
+To compute an image based on a set of s-parameter measurements it is necessary that you have a folder with the corresponding `.s2p` touchstone files. A separate touchstone file is required for every antenna position. The name of the file indicates the measurement number, e.g. `0.s2p`, `1.s2p`, `2.s2p` and so on. To generate the image, it is necessary to run the script `Imaging_VNA.py`. In the variable 'path' you just have to specfiy the folder with your touchstone files.
 
 ## Imaging with FMCW Radar
 
-For the image generation with the FMCW radar system you have to run two files. First, the file `Prepare_Radar_Data.py` and then the file `Bildgebung_FMCW_Radar_MM.py`.
+For the image generation with the FMCW radar system you have to run two files. First, the file `Prepare_Radar_Data.py` and then the file `Imaging_FMCW_Radar.py`.
