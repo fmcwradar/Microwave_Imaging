@@ -78,7 +78,7 @@ image_matrix = image_matrix**2
 
 image_matrix_norm = image_matrix/np.max(np.abs(image_matrix))
 
-ax = sns.heatmap(10*np.log10(np.abs(image_matrix_norm)), cbar = True, cmap = 'jet',square = True, vmax = 0, vmin = -dynamic_range)   
+ax = sns.heatmap(10*np.log10(np.abs(image_matrix_norm)), cbar = True, cmap = 'jet',square = True, vmax = 0, vmin = -dynamic_range, cbar_kws={'label': 'Normalized Intensity (dB)'})   
 
 x_ticks = np.flip(np.round(np.linspace(start_x, end_x, int(np.round((np.abs(end_x)+np.abs(start_x))/2,0)+1)),1))
 x_ticks_location = np.linspace(0, len(x_axis), int(np.round((np.abs(end_x)+np.abs(start_x))/2,0)+1))
@@ -95,8 +95,6 @@ plt.xlabel("x (cm)", fontsize = 22.5)
 plt.ylabel("y (cm)", fontsize = 22.5)
 cax = ax.figure.axes[-1]
 cax.tick_params(labelsize=22.5)
-
-
 plt.show()
 
 filepath = r'{0}\Pickle Files\final_image.pkl'.format(current_dir)
