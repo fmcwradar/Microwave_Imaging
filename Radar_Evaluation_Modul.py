@@ -118,16 +118,6 @@ class radar_measurement_evaluation:
             #Write Ramp Data into Corresponding Matrix Row
             data_matrix_down[counter-1,:] = ramp_data_down
             
-            
-            if counter == 200 and self.name == "0":
-            
-                plt.plot(I)
-                plt.plot(Q)
-                x_axis_cut = np.arange(start, stop)
-                plt.plot(x_axis_cut, Q[start:stop])
-                plt.show()
-            
-            
             #Change Start and Stop Values for next Ramp
             counter = counter + 1
             start = lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
