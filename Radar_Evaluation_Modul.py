@@ -42,13 +42,12 @@ class radar_measurement_evaluation:
         log            : (bool, string) flag to enable logging (alternatively a path can be specified)
     """
     
-    def __init__(self,path,name,B,T_c,c,number_of_ramps,total,f0,f1,windowing):
-    
+    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing):
         self.path = path
         self.name = name
         self.bandwidth = B
         self.chirp_time = T_c
-        self.speed = c
+        self.speed = c0
         self.number_of_ramps = number_of_ramps
         self.total = total
         self.f0 = f0
@@ -69,19 +68,19 @@ class radar_measurement_evaluation:
         Q = np.array(data['Q'].tolist())
          
         if swap_IQ == True:
-            I = np.array(data['Q'].tolist())
-            Q = np.array(data['I'].tolist())   
+            I,Q = Q,I
          
-        timestep = np.round(time[1]-time[0],8)
-
-        number_of_points = int(len(I))
+        timestep = np.round(np.mean(np.diff(time)),12)
+        
+        number_of_points = len(I)
 
         self.I = I
         self.Q = Q
         self.timestep = timestep
         self.number_of_points = number_of_points
-        self.samples_per_ramp = (self.chirp_time)/(timestep)
-                
+        self.samples_per_ramp = int((self.chirp_time)/(timestep))
+        
+         
     def find_starting_point(self):
         #This function determines the starting points of the up-ramps.
         
@@ -89,7 +88,7 @@ class radar_measurement_evaluation:
      
         phase_slice = np.unwrap(np.angle(data_slice))
         
-        starting_point_ramp = int(np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)]))
+        starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
         
         ramps_in_samples = int(len(data_slice)/(int(2*self.samples_per_ramp)))-20
         
@@ -111,49 +110,41 @@ class radar_measurement_evaluation:
 
         self.lineup = lineup
         
-        
     def collect_ramp_data(self):  
         #This function collects the data of the up-ramp and writes it into the matrix data_matrix_up.
         #The dimensions of data_matrix_up are (samples_per_ramp, number_of_ramps).     
-        lineup = self.lineup
-        I = self.I
-        Q = self.Q 
-        number_of_ramps = self.number_of_ramps
-        samples_per_ramp = int(self.samples_per_ramp)
-        timestep = self.timestep
         S = self.bandwidth/self.chirp_time
-        c = self.speed
         
         #Define data matrix for collecting data of up-ramp.
-        data_matrix_up = np.zeros((number_of_ramps,samples_per_ramp), dtype = complex)
+        data_matrix_up = np.zeros((self.number_of_ramps,self.samples_per_ramp), dtype = complex)
         
         #Calculate new frequency axis
-        time = np.linspace(0, timestep*(samples_per_ramp-1),samples_per_ramp)
+        time = np.linspace(0, self.timestep*(self.samples_per_ramp-1),self.samples_per_ramp)
             
         N = int(len(time))
         dt = float(time[1] - time[0])
         fa = (1/dt) # scan frequency
         X = np.linspace(0, fa, N, endpoint=True)
-        distance = X*c/(2*S)
+        distance = X*self.speed/(2*S)
         frequency = X/1e3
         
         #Prepare for collect data from up-ramp
         counter = 1
-        start = lineup[0]   
-        stop = start + samples_per_ramp
+        start = self.lineup[0]   
+        stop = start + self.samples_per_ramp
         
         #Collect data from up-ramp
-        for counter in range(1,number_of_ramps+1):
-            
-            ramp_data_up = I[start:stop] + 1j*Q[start:stop] #A down-ramp will translate into I - 1j*Q.
+        for counter in range(1,self.number_of_ramps+1):
+        
+            ramp_data_up = self.I[start:stop] + 1j*self.Q [start:stop] #A down-ramp will translate into I - 1j*Q.
             
             #Write Ramp Data into Corresponding Matrix Row
             data_matrix_up[counter-1,:] = ramp_data_up
             
             #Change start and stop values for next ramp.
             counter = counter + 1
-            start = lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
-            stop = start + samples_per_ramp
+            start = self.lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
+            stop = start + self.samples_per_ramp
         
         self.matrix_up = data_matrix_up
         self.distance = distance
@@ -161,27 +152,22 @@ class radar_measurement_evaluation:
 
     def average_data_calculate_FTT(self):
         #This function is used for averaging of the sampled data and calculating the range FFT. Finally the range FFT is multiplied with the phase correction term.
-    
-        from scipy.constants import speed_of_light
-        c0 = speed_of_light
-        windowing = self.windowing
-        
         data_matrix_up = self.matrix_up
         #Calculate average of up-ramp data.
         mean_value_up_raw = (np.mean(data_matrix_up, axis = 0))
 
         from scipy import signal
 
-        if windowing == True:
+        if self.windowing == True:
             mean_value_up_final = mean_value_up_raw*np.kaiser(self.samples_per_ramp, beta = 3.5)
 
-        if windowing == False:
+        if self.windowing == False:
             mean_value_up_final = mean_value_up_raw
 
         #Calculate the IF spectrum.
         distance_corrected = np.linspace(self.distance[0], self.distance[len(self.distance)-1], self.total) #Adjust distance vector to the zero-padding.
         
-        compensation_term = 2*np.pi*self.f0*(2*distance_corrected)/c0
+        compensation_term = 2*np.pi*self.f0*(2*distance_corrected)/self.speed
 
         spectrum_up = np.fft.fft(mean_value_up_final, norm = 'forward', n = self.total)
         
