@@ -21,7 +21,7 @@ For the image generation with the FMCW radar system you have to run two files. F
 The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`. This file contains the class 'radar_measurement_evaluation'.
 
 ## Documentation
-All the signal processing steps that are implemented can be found in the `.pdf` file 'Flow-Chart'.
+All the signal processing steps that are implemented can be found in the `.pdf` file 'Flow_Chart_Comparison'.
 
 ## What else?
 If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de.
