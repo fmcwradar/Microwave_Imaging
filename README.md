@@ -24,7 +24,9 @@ The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`.
 For both VNA and FMCW radar imaging exemplary measurement data can be found in the folder 'Exemplary Measurement Data'.
 
 ## What else?
-If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de
+If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de.
+
+Exemplary measurement data is unfortunately too large for GitHub. If you are interested you can write me an e-mail and I will provide a Google Drive link where you can find measurement data.
 
 I hope you find my scripts helpful!
 
