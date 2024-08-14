@@ -68,7 +68,7 @@ class radar_measurement_evaluation:
         
         starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
         
-        ramps_in_samples = int(len(data_slice)/(int(2*self.samples_per_ramp)))-20
+        ramps_in_samples = int(len(data_slice)/(2*self.samples_per_ramp))-1
         
         offset = 0
         
