@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class radar_measurement_evaluation:
 
-     """
+    """
     Class that prepares the sampled IF (I,Q) data of an FMCW radar system for the image generation.
     
     INPUTS:
@@ -50,7 +50,7 @@ class radar_measurement_evaluation:
          
         timestep = np.round(np.mean(np.diff(time)),12)
         
-        number_of_points = len(I)
+        number_of_points = len(self.I)
 
         self.timestep = timestep
         self.number_of_points = number_of_points
@@ -71,7 +71,12 @@ class radar_measurement_evaluation:
         offset = 0
         
         lineup = []
-             
+        
+        #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp, but at
+        #starting_point_ramp+2*samples_per_ramp-1. This is why every potential starting point gets checked if there is really a phase jump
+        #at the corresponding index. If not then starting_point_ramp is decreased by one.
+        
+        
         for ramp_index in range(0, ramps_in_samples):
                 
             potential_start = int(starting_point_ramp + (2*self.samples_per_ramp)*ramp_index + offset)
@@ -94,13 +99,14 @@ class radar_measurement_evaluation:
         #Define data matrix for collecting data of up-ramp.
         data_matrix_up = np.zeros((self.number_of_ramps,self.samples_per_ramp), dtype = complex)
         
-        #Calculate new frequency axis
+        #Calculate frequency vector based on timestep and samples_per_ramp.
         time = np.linspace(0, self.timestep*(self.samples_per_ramp-1),self.samples_per_ramp)
-            
         dt = float(time[1] - time[0])
         fa = (1/dt) # scan frequency
-        X = np.linspace(0, fa, self.samples_per_ramp, endpoint=True)
-        distance = X*self.speed/(2*S)
+        frequency_vector = np.linspace(0, fa, self.samples_per_ramp, endpoint=True)
+        
+        #Calculate distance based on the frequency_vector.
+        distance = frequency_vector*self.speed/(2*S)
         
         #Prepare for collect data from up-ramp
         counter = 1
@@ -124,7 +130,7 @@ class radar_measurement_evaluation:
         self.distance = distance
 
     def average_data_calculate_FTT(self):
-        #This function is used for averaging of the sampled data and calculating the range FFT. Finally the range FFT is multiplied with the phase correction term.
+        #This function is used for averaging of the sampled data and calculating the range FFT. In the final step the range FFT is multiplied with the phase correction term.
         data_matrix_up = self.matrix_up
         #Calculate average of up-ramp data.
         mean_value_up_raw = (np.mean(data_matrix_up, axis = 0))
