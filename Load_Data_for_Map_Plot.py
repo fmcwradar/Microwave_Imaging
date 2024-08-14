@@ -10,11 +10,11 @@ def load_data(use_test_data,increment,current_dir):
         with open(r'{0}\Pickle Files\spectrum.pkl'.format(current_dir), 'rb') as file: 
             
             # Call load method to deserialze. 
-            spectrum_difference_array_down = pickle.load(file) 
+            spectrum_array = pickle.load(file) 
             
         with open(r'{0}\Pickle Files\distance.pkl'.format(current_dir), 'rb') as file: 
             
             # Call load method to deserialize. 
             distance = pickle.load(file) 
             
-    return [distance, spectrum_difference_array_down]
+    return [distance, spectrum_array]
