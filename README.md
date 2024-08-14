@@ -1,4 +1,4 @@
-# Microwave Imaging
+# Microwave_Imaging
 
 In this repository you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency modulated continuous wave (FMCW) radar system.
 
