@@ -21,10 +21,15 @@ T_c = 200*1e-6
 S = B/T_c
 c = sc.speed_of_light
 number_of_ramps = 300
-total = 5005
+total = 4096
+f0 = 6e9
+f1 = 14e9
+windowing = True
+
+
 measurement_list_no_target = []
 measurement_list_time_domain_up = []
-measurement_list_time_domain_down = []
+measurement_list_time_domain_up = []
 
 spectrum_matrix = np.zeros((len(file_names),total), dtype = complex)
 
@@ -33,13 +38,13 @@ for count, name in enumerate(file_names):
 
     print(count)
     
-    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c,number_of_ramps,total)
+    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c,number_of_ramps,total,f0,f1,windowing)
     single_measurement.run_radar_evaluation()
-    spectrum_matrix[count,:] = single_measurement.spectrum_down
+    spectrum_matrix[count,:] = single_measurement.spectrum_up
     
 distance_corrected = single_measurement.distance_corrected   
       
-#Save the Results in Pickle Files
+#Save the results in pickle files.
 import pickle
 import os   
 
@@ -57,12 +62,12 @@ if os.path.exists(filepath):
             
 with open(r'{0}\Pickle Files\spectrum.pkl'.format(current_dir), 'wb') as file: 
       
-    # A new file will be created 
+    # A new file will be created.
     pickle.dump(spectrum_matrix, file) 
 
 with open(r'{0}\Pickle Files\distance.pkl'.format(current_dir), 'wb') as file: 
       
-    # A new file will be created 
+    # A new file will be created. 
     pickle.dump(distance_corrected, file) 
 
 
