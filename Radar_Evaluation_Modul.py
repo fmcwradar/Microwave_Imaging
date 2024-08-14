@@ -42,18 +42,16 @@ class radar_measurement_evaluation:
         data = read_csv(filepath,names=columns)
         
         time =  np.array(data['time'].tolist())
-        I = np.array(data['I'].tolist())
-        Q = np.array(data['Q'].tolist())
+        self.I = np.array(data['I'].tolist())
+        self.Q = np.array(data['Q'].tolist())
          
         if swap_IQ == True:
-            I,Q = Q,I
+            self.I,self.Q = self.Q,self.I
          
         timestep = np.round(np.mean(np.diff(time)),12)
         
         number_of_points = len(I)
 
-        self.I = I
-        self.Q = Q
         self.timestep = timestep
         self.number_of_points = number_of_points
         self.samples_per_ramp = int((self.chirp_time)/(timestep))
@@ -103,7 +101,6 @@ class radar_measurement_evaluation:
         fa = (1/dt) # scan frequency
         X = np.linspace(0, fa, self.samples_per_ramp, endpoint=True)
         distance = X*self.speed/(2*S)
-        frequency = X/1e3
         
         #Prepare for collect data from up-ramp
         counter = 1
