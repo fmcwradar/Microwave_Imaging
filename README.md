@@ -18,6 +18,8 @@ For the image generation with the FMCW radar system you have to run two files. F
 
 `Prepare_Radar_Data.py` computes the range FFT of every measurement and combines them in a matrix. This matrix and the corresponding distance vector is saved in two pickle files `spectrum.pkl` and `distance_corrected.pkl`. For this, it is necessary that there is a folder name 'Pickle Files' in the directory. `Imaging_FMCW_Radar.py` then calculates the image based on `spectrum.pkl` and `distance_corrected.pkl`. The input data for `Prepare_Radar_Data.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement number, e.g. `0.csv`, `1.csv`, `2.csv` and so on.
 
+The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`. This file contains the class 'radar_measurement_evaluation'.
+
 ## Getting Started
 For both VNA and FMCW radar imaging exemplary measurement data can be found in the folder 'Exemplary Measurement Data'.
 
