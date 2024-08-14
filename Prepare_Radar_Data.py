@@ -13,19 +13,15 @@ file_names = []
 
 for number in range(0, number_of_files+1):
     file_names.append("{0}".format(number))
-
-start_frequency = 6  #GHz
-stop_frequency = 14 #GHz
-B = (stop_frequency-start_frequency)*1e9
-T_c = 200*1e-6
-S = B/T_c
-c = sc.speed_of_light
-number_of_ramps = 300
-total = 4096
+    
 f0 = 6e9
 f1 = 14e9
+B = (f1-f0)
+T_c = 200*1e-6
+c0 = sc.speed_of_light
+number_of_ramps = 300
+total = 4096
 windowing = True
-
 
 measurement_list_no_target = []
 measurement_list_time_domain_up = []
@@ -35,10 +31,8 @@ spectrum_matrix = np.zeros((len(file_names),total), dtype = complex)
 
 #Iterate over the measurements.
 for count, name in enumerate(file_names):
-
     print(count)
-    
-    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c,number_of_ramps,total,f0,f1,windowing)
+    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing)
     single_measurement.run_radar_evaluation()
     spectrum_matrix[count,:] = single_measurement.spectrum_up
     
