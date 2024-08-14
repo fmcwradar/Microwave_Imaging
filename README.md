@@ -26,5 +26,5 @@ For both VNA and FMCW radar imaging exemplary measurement data can be found in t
 ## What else?
 If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de
 
-Hope you enjoy the images!
+I hope you find my scripts helpful!
 
