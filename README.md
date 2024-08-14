@@ -20,8 +20,8 @@ For the image generation with the FMCW radar system you have to run two files. F
 
 The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`. This file contains the class 'radar_measurement_evaluation'.
 
-## Getting Started
-For both VNA and FMCW radar imaging exemplary measurement data can be found in the folder 'Exemplary Measurement Data'.
+## Documentation
+All the signal processing steps that are implemented can be found in the `.pdf` file 'Flow-Chart'.
 
 ## What else?
 If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de.
