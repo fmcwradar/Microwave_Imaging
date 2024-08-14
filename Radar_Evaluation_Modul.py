@@ -133,9 +133,7 @@ class radar_measurement_evaluation:
         data_matrix_up = self.matrix_up
         #Calculate average of up-ramp data.
         mean_value_up_raw = (np.mean(data_matrix_up, axis = 0))
-
-        from scipy import signal
-
+         
         if self.windowing == True:
             mean_value_up_final = mean_value_up_raw*np.kaiser(self.samples_per_ramp, beta = 3.5)
 
