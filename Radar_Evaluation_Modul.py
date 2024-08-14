@@ -5,6 +5,43 @@ import matplotlib.pyplot as plt
 
 class radar_measurement_evaluation:
 
+     """
+    Class that performs transient analysis of the dynamical system, defined by the 
+    blocks and connecions. It manages all the blocks and connections and the timestep update.
+
+    The global system equation is evaluated by fixed point iteration, so the information from 
+    each timestep gets distributed within the entire system and is available for all blocks at 
+    all times.
+
+    The minimum number of fixed-point iterations 'iterations_min' is set to 'None' by default 
+    and then the length of the longest internal signal path (with passthrough) is used as the 
+    estimate for minimum number of iterations needed for the information to reach all instant 
+    time blocks in each timestep. Dont change this unless you know that the actual path is 
+    shorter or something similar that prohibits instant time information flow. 
+
+    Convergence check for the fixed-point iteration loop with 'tolerance_fpi' is based on 
+    relative error to previous iteration and should not be touched.
+
+    Multiple numerical integrators are implemented in the 'pathsim.solvers' module. 
+    The default solver is a fixed timestep 2nd order Strong Stability Preserving Runge Kutta 
+    (SSPRK22) method which is quite fast and has ok accuracy, especially if you are forced to 
+    take small steps to cover the behaviour of forcing functions. Adaptive timestepping and 
+    implicit integrators are also available.
+    
+    INPUTS:
+        blocks         : (list of 'Block' objects) blocks that make up the system
+        connections    : (list of 'Connection' objects) connections that connect the blocks
+        dt             : (float) transient simulation timestep
+        dt_min         : (float) lower bound for timestep, default '0.0'
+        dt_max         : (float) upper bound for timestep, default 'None'
+        Solver         : ('Solver' class) solver for numerical integration from pathsim.solvers
+        tolerance_fpi  : (float) relative tolerance for convergence of fixed-point iterations
+        tolerance_lte  : (float) absolute tolerance for local truncation error (integrator error controller)
+        iterations_min : (int) minimum number of fixed-point iterations for system function evaluation
+        iterations_max : (int) maximum allowed number of fixed-point iterations for system function evaluation
+        log            : (bool, string) flag to enable logging (alternatively a path can be specified)
+    """
+    
     def __init__(self,path,name,B,T_c,c,number_of_ramps,total,f0,f1,windowing):
     
         self.path = path
