@@ -99,10 +99,9 @@ class radar_measurement_evaluation:
         #Calculate new frequency axis
         time = np.linspace(0, self.timestep*(self.samples_per_ramp-1),self.samples_per_ramp)
             
-        N = int(len(time))
         dt = float(time[1] - time[0])
         fa = (1/dt) # scan frequency
-        X = np.linspace(0, fa, N, endpoint=True)
+        X = np.linspace(0, fa, self.samples_per_ramp, endpoint=True)
         distance = X*self.speed/(2*S)
         frequency = X/1e3
         
@@ -126,7 +125,6 @@ class radar_measurement_evaluation:
         
         self.matrix_up = data_matrix_up
         self.distance = distance
-        self.N = N
 
     def average_data_calculate_FTT(self):
         #This function is used for averaging of the sampled data and calculating the range FFT. Finally the range FFT is multiplied with the phase correction term.
