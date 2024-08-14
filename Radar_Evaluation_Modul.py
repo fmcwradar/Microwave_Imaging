@@ -110,7 +110,7 @@ class radar_measurement_evaluation:
         #Collect data from up-ramp
         for counter in range(1,self.number_of_ramps+1):
         
-            ramp_data_up = self.I[start:stop] + 1j*self.Q [start:stop] #A down-ramp will translate into I - 1j*Q.
+            ramp_data_up = self.I[start:stop] + 1j*self.Q[start:stop] #A down-ramp will translate into I - 1j*Q.
             
             #Write Ramp Data into Corresponding Matrix Row
             data_matrix_up[counter-1,:] = ramp_data_up
