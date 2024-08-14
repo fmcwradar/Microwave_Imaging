@@ -1,4 +1,4 @@
-# Radar_Signal_Processing
+# Microwave Imaging for Breast Cancer Detection - A Comparison between VNA and FMCW Radar
 
 In this repository you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency modulated continuous wave (FMCW) radar system.
 
