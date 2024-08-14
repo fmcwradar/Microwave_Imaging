@@ -75,8 +75,6 @@ class radar_measurement_evaluation:
         #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp, but at
         #starting_point_ramp+2*samples_per_ramp-1. This is why every potential starting point gets checked if there is really a phase jump
         #at the corresponding index. If not then starting_point_ramp is decreased by one.
-        
-        
         for ramp_index in range(0, ramps_in_samples):
                 
             potential_start = int(starting_point_ramp + (2*self.samples_per_ramp)*ramp_index + offset)
