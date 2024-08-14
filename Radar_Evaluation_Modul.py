@@ -15,8 +15,8 @@ class radar_measurement_evaluation:
         chirp_time: (float) ramp duration (s).
         speed: (float) propagation velocity of the electromagnetic waves (m/s).
         number_of_ramps: (int) number of ramps that shall be evaluated.
-        f0: (float) start frequency of the ramp.
-        f1: (float) stop frequency of the ramp.
+        f0: (float) start frequency of the ramp (Hz).
+        f1: (float) stop frequency of the ramp (Hz).
         windowing: (bool) set to "True" if windowing shall be used.
     """
     
