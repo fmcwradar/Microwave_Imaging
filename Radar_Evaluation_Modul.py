@@ -121,7 +121,7 @@ class radar_measurement_evaluation:
             
             #Change start and stop values for next ramp.
             counter = counter + 1
-            start = self.lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
+            start = self.lineup[counter-1]   
             stop = start + self.samples_per_ramp
         
         self.matrix_up = data_matrix_up
