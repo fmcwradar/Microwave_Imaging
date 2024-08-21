@@ -62,6 +62,6 @@ for antenna_location in antenna_positions:
         
         target_counter = target_counter + 1
         
-    mlin_length.write_touchstone(r"{0}\Ideal S Param\{1}.s2p".format(current_dir,counter), r_ref = 50)
+    mlin_length.write_touchstone(r"{0}\Ideal Data VNA\{1}.s2p".format(current_dir,counter), r_ref = 50)
         
     counter = counter + 1
