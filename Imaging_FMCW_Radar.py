@@ -5,8 +5,6 @@ import os
 import seaborn as sns
 from scipy import interpolate
 
-
-
 #############################################################
 #Load Data from Radar Measurement
 from Load_Data_for_Map_Plot import load_data
