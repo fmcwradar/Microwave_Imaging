@@ -16,8 +16,8 @@ use_test_data = False
 
 loaded_values = load_data(use_test_data,increment,current_dir)
 
-#Define the offset of the EM waves due to cables, adapters etc.
-offset = 1.445
+#Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
+offset = 0
 distance = (loaded_values[0]-offset)*100
 distance *= 2
 list_of_radar_spectra = loaded_values[1]
