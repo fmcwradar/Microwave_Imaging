@@ -22,10 +22,11 @@ f1 = 14e9
 B = (f1-f0)
 T_c = 200*1e-6
 c0 = sc.speed_of_light
-number_of_ramps = 1
+number_of_ramps = 300
 total = 4096
 windowing = True
 ideal = True
+swap_IQ = False
 
 measurement_list_no_target = []
 measurement_list_time_domain_up = []
@@ -36,7 +37,7 @@ spectrum_matrix = np.zeros((len(file_names),total), dtype = complex)
 #Iterate over the measurements.
 for count, name in enumerate(file_names):
     print(count)
-    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal)
+    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ)
     single_measurement.run_radar_evaluation()
     spectrum_matrix[count,:] = single_measurement.spectrum_up
     
@@ -67,5 +68,3 @@ with open(r'{0}\Pickle Files\distance.pkl'.format(current_dir), 'wb') as file:
       
     # A new file will be created. 
     pickle.dump(distance_corrected, file) 
-
-
