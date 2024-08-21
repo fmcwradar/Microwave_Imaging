@@ -12,7 +12,7 @@ from scipy import interpolate
 current_dir = os.path.dirname(__file__)
 
 #Specifiy path of the corresponding .s2p files.
-path = r"G:\Meine Ablage\Finaler Vergleich Radar vs. VNA\02-07-2024\Bassi\VNA"
+path = r"{0}\Ideal Data VNA".format(current_dir)
 
 #General settings of the grid.
 number_of_points_x = 201
@@ -22,7 +22,7 @@ end_x = 40
 start_y = 60
 end_y = 100
 #Define the offset of the EM waves due to cables, adapters etc.
-offset = 144.5*2+1
+offset = 0
 
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
 
@@ -34,7 +34,7 @@ antenna_counter = 0
 antenna_distance = 10   #Difference between the center positions of TX and RX antenna.
 
 #Dynamic range of the image (dB).
-dynamic_range = 15
+dynamic_range = 30
 
 #Iterate over antenna positions.
 for antenna_x in antenna_positions:
