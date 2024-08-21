@@ -19,9 +19,10 @@ class radar_measurement_evaluation:
         f1: (float) stop frequency of the ramp (Hz).
         windowing: (bool) set to "True" if windowing shall be used.
         ideal: (bool) set to "True" if ideal data generated with "Ideal_Radar_Data_Generator.py" is used.
+        swap_IQ: (bool) set to "True" if IF-I is connected to channel 2 of the oscilloscope and IF-Q to channel 1.
     """
     
-    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal):
+    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ):
         self.path = path
         self.name = name
         self.bandwidth = B
@@ -33,11 +34,12 @@ class radar_measurement_evaluation:
         self.f1 = f1
         self.windowing = windowing
         self.ideal = ideal
+        self.swap_IQ = swap_IQ
+        if self.ideal == True:
+            self.number_of_ramps = 1
 
-    def getdata(self,swap_IQ = False):
-        #This function reads the data from the .csv-file. The .csv-file contains the time, I and Q.
-        #If swap_IQ = True then I and Q are swapped. This is necessary if IF-I is connected to channel 2 of the oscilloscope and IF-Q to channel 1.
-        
+    def getdata(self):
+        #This function reads the data from the .csv-file. The .csv-file contains the time, I and Q.  
         filepath = str(r"{0}\{1}.csv".format(self.path,self.name))
         columns = ['time','I','Q']
         
@@ -47,7 +49,7 @@ class radar_measurement_evaluation:
         self.I = np.array(data['I'].tolist())
         self.Q = np.array(data['Q'].tolist())
          
-        if swap_IQ == True:
+        if self.swap_IQ == True:
             self.I,self.Q = self.Q,self.I
          
         timestep = np.round(np.mean(np.diff(time)),12)
@@ -161,7 +163,7 @@ class radar_measurement_evaluation:
 
     def run_radar_evaluation(self):
     
-        self.getdata(swap_IQ = False)
+        self.getdata()
         self.find_starting_point()  
         self.collect_ramp_data()
         self.average_data_calculate_FTT()
