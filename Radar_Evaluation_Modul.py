@@ -19,7 +19,7 @@ class radar_measurement_evaluation:
         f1: (float) stop frequency of the ramp (Hz).
         windowing: (bool) set to "True" if windowing shall be used.
         ideal: (bool) set to "True" if ideal data generated with "Ideal_Radar_Data_Generator.py" is used.
-        swap_IQ: (bool) set to "True" if IF-I is connected to channel 2 of the oscilloscope and IF-Q to channel 1.
+        swap_IQ: (bool) set to "True" if IF-I is sampled with channel 2 of the oscilloscope and IF-Q with channel 1.
     """
     
     def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ):
