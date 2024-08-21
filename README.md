@@ -26,6 +26,9 @@ The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`.
 ## Documentation
 All the signal processing steps that are implemented can be found in the `.pdf` file 'Flow_Chart_Comparison'.
 
+## Getting started
+The repository contains two scripts (`Ideal_VNA_Data_Generator.py` and `Ideal_Radar_Data_Generator.py`) for the generation of ideal VNA and radar data. The ideal data is saved in the folders 'Ideal Data VNA' and 'Ideal Data Radar'. The default settings are chosen so that you simply have to download the entire repository. Then you have to execute `Ideal_VNA_Data_Generator.py` and `Imaging_VNA.py`. To generate a radar image the right order is `Ideal_Radar_Data_Generator.py`, `Prepare_Radar_Data.py` and `Imaging_FMCW_Radar.py`.
+
 ## What else?
 If you have any comments feel free to write me an e-mail to m.maier@tu-braunschweig.de.
 
