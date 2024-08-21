@@ -5,7 +5,7 @@ import csv
 import os
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(30,80),(20,90),(20,70),(10,65),(30,65)]
+targets = [(10,70),(30,90),(20,80),(35,70)]
 #Define number of points.
 points = 1000
 #Define bandwidth of the FMCW radar system.
