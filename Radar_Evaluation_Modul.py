@@ -18,9 +18,10 @@ class radar_measurement_evaluation:
         f0: (float) start frequency of the ramp (Hz).
         f1: (float) stop frequency of the ramp (Hz).
         windowing: (bool) set to "True" if windowing shall be used.
+        ideal: (bool) set to "True" if ideal data generated with "Ideal_Radar_Data_Generator.py" is used.
     """
     
-    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing):
+    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal):
         self.path = path
         self.name = name
         self.bandwidth = B
@@ -31,8 +32,9 @@ class radar_measurement_evaluation:
         self.f0 = f0
         self.f1 = f1
         self.windowing = windowing
+        self.ideal = ideal
 
-    def getdata(self,swap_IQ = True):
+    def getdata(self,swap_IQ = False):
         #This function reads the data from the .csv-file. The .csv-file contains the time, I and Q.
         #If swap_IQ = True then I and Q are swapped. This is necessary if IF-I is connected to channel 2 of the oscilloscope and IF-Q to channel 1.
         
@@ -59,33 +61,38 @@ class radar_measurement_evaluation:
          
     def find_starting_point(self):
         #This function determines the starting points of the up-ramps.
+        #The ideal is only one ramp so it is not necessary to determine the starting point.
+        if self.ideal == True:
+            lineup = [0,0]
         
-        data_slice = self.I+1j*self.Q
-     
-        phase_slice = np.unwrap(np.angle(data_slice))
+        if self.ideal == False:
         
-        starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
-        
-        ramps_in_samples = int(len(data_slice)/(2*self.samples_per_ramp))-1
-        
-        offset = 0
-        
-        lineup = []
-        
-        #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
-        #starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
-        #at the corresponding index. If not then starting_point_ramp is decreased by one.
-        for ramp_index in range(0, ramps_in_samples):
-                
-            potential_start = int(starting_point_ramp + (2*self.samples_per_ramp)*ramp_index + offset)
+            data_slice = self.I+1j*self.Q
+         
+            phase_slice = np.unwrap(np.angle(data_slice))
             
-            if phase_slice[potential_start] < phase_slice[potential_start-1] and phase_slice[potential_start] < phase_slice[potential_start+1]:
+            starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
+            
+            ramps_in_samples = int(len(data_slice)/(2*self.samples_per_ramp))-1
+            
+            offset = 0
+            
+            lineup = []
+            
+            #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
+            #starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
+            #at the corresponding index. If not then starting_point_ramp is decreased by one.
+            for ramp_index in range(0, ramps_in_samples):
+                    
+                potential_start = int(starting_point_ramp + (2*self.samples_per_ramp)*ramp_index + offset)
                 
-                lineup.append(potential_start)
-                
-            else:
-                
-                offset = offset - 1
+                if phase_slice[potential_start] < phase_slice[potential_start-1] and phase_slice[potential_start] < phase_slice[potential_start+1]:
+                    
+                    lineup.append(potential_start)
+                    
+                else:
+                    
+                    offset = offset - 1
 
         self.lineup = lineup
         
@@ -114,14 +121,14 @@ class radar_measurement_evaluation:
         #Collect data from up-ramp
         for counter in range(1,self.number_of_ramps+1):
         
-            ramp_data_up = self.I[start:stop] + 1j*self.Q[start:stop] 
+            ramp_data_up = self.I[start:stop] + 1j*self.Q[start:stop] #A down-ramp will translate into I - 1j*Q.
             
             #Write Ramp Data into Corresponding Matrix Row
             data_matrix_up[counter-1,:] = ramp_data_up
             
             #Change start and stop values for next ramp.
             counter = counter + 1
-            start = self.lineup[counter-1]   
+            start = self.lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
             stop = start + self.samples_per_ramp
         
         self.matrix_up = data_matrix_up
@@ -154,7 +161,7 @@ class radar_measurement_evaluation:
 
     def run_radar_evaluation(self):
     
-        self.getdata(swap_IQ = True)
+        self.getdata(swap_IQ = False)
         self.find_starting_point()  
         self.collect_ramp_data()
         self.average_data_calculate_FTT()
