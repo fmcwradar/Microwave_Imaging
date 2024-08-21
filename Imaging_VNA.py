@@ -21,7 +21,7 @@ start_x = 0
 end_x = 40
 start_y = 60
 end_y = 100
-#Define the offset of the EM waves due to cables, adapters etc.
+#Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
 offset = 0
 
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
