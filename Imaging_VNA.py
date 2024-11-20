@@ -12,21 +12,26 @@ from scipy import interpolate
 current_dir = os.path.dirname(__file__)
 
 #Specifiy path of the corresponding .s2p files.
-path = r"{0}\Ideal Data VNA".format(current_dir)
+path = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Klotz 1"
 
 #General settings of the grid.
-number_of_points_x = 201
-number_of_points_y = 201
+number_of_points_x = 401
+number_of_points_y = 401
 start_x = 0
 end_x = 40
-start_y = 60
-end_y = 100
+start_y = 50
+end_y = 90
 #Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
-offset = 0
+offset = 142
+#Define if the measurement shall be calibrated. This value must be "False" for ideal data.
+calibration = False
 
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
 
 c0 = speed_of_light
+
+#Define total number of points for the IFFT. 
+nPad = 8192 #Zero Padding
 
 #Define antenna positions.
 antenna_positions = np.linspace(0, 45, 46)
@@ -41,20 +46,25 @@ for antenna_x in antenna_positions:
 
     print(antenna_x)
 
+    #Load s-parameter of measurement without a target.
+    net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Leermessung Sweep\{0}.s2p".format(int(antenna_counter)))
+    s21_match = net.s[:,1,0]
+    
     #Prepare s-parameter.
     net = rf.Network("{0}\{1}.s2p".format(path, int(antenna_counter)))
-    s21_raw = net.s[:,1,0]
+    
+    if calibration == True:
+        s21_raw = net.s[:,1,0]-s21_match
+    if calibration == False:
+        s21_raw = net.s[:,1,0]
+    
+    #Get frequency vector and the relevant frequency points.
     frequency_raw = net.f
-    #Interpolate the s-parameter to ensure that the lower frequency divided by the frequency step is an integer value.
-    frequency_desired = np.linspace(6e9, 14e9, 501)
-    s21_abs_interpol = interpolate.interp1d(frequency_raw, np.abs((s21_raw)), kind = 'cubic')
-    s21_angle_interpol = interpolate.interp1d(frequency_raw, np.unwrap(np.angle((s21_raw))), kind = 'cubic')
-    
-    s21_abs = s21_abs_interpol(frequency_desired)
-    s21_angle = s21_angle_interpol(frequency_desired)
-    
-    s21_desired = s21_abs * np.exp(1j*s21_angle)    
-    S = s21_desired #This is the value of S21 that will be used for the calculation of the image.
+    index_0 = np.argmax(frequency_raw >= 6e9)
+    index_1 = np.argmax(frequency_raw >= 14e9)
+
+    S = s21_raw[index_0:index_1+1]
+    frequency_desired = frequency_raw[index_0:index_1+1]
 
     #Extract parameter from frequency vector.
     fBu = frequency_desired[0]     #f_0
@@ -64,13 +74,19 @@ for antenna_x in antenna_positions:
 
     print('Frequency Sweep: ', fBu, fBo, df, N)
 
-    #Define total number of points for the IFFT. 
-    nPad = 4096 #Zero Padding
+    with open(r"{0}\Pickle Files\error_function_VNA.pkl".format(current_dir), 'rb') as file: 
+            
+            # Call load method to deserialze. 
+            error_function = pickle.load(file) 
     
     #Use window function.
     window = np.kaiser(N, beta = 3.5)
-    Sf = S*window
-
+    
+    if calibration == True:
+        Sf = S*window*error_function
+    if calibration == False:
+        Sf = S*window
+    
     #Calculate maximum unambigious range and distance vector.
     Lmax = 0.5*c0/df
     print('Lmax ',Lmax)
@@ -89,12 +105,9 @@ for antenna_x in antenna_positions:
     #Calculate the IFFT. Attention: It is important that the result of the IFFT is a complex signal. Otherwise the phase information will be lost.
     Stp = np.fft.ifft(Spad, n=nPad)
 
-    #Calculate the IFFT. Attention: It is important that the result of the IFFT is a complex signal. Otherwise the phase information will be lost.
-    Stp = np.fft.ifft(Spad, n=nPad)
-
-    #Use distance_VNA and signal_VNA to make the rest of the script comparable to the image generation with the FMCW radar system.
+    #Use distance_VNA and spectrum_VNA to make the rest of the script comparable to the image generation with the FMCW radar system.
     distance_VNA = lengthAxis*2*100-2*offset #In cm. Moreover the offset value is subtracted.
-    signal_VNA = Stp 
+    spectrum_VNA = Stp 
     
     #Prepare Grid
     x_axis = np.linspace(start_x, end_x, number_of_points_x)
@@ -102,15 +115,15 @@ for antenna_x in antenna_positions:
 
     x_coordinates, y_coordinates = np.meshgrid(x_axis, y_axis)
 
-    distance_a = np.sqrt((x_coordinates-(end_x-antenna_x-antenna_distance/2+start_x))**2 + y_coordinates**2)    #Forward wave.
+    distance_a = np.sqrt((x_coordinates-(end_x-antenna_x+start_x))**2 + y_coordinates**2+(antenna_distance/2)**2)    #Forward wave.
     
-    distance_b = np.sqrt((x_coordinates-(end_x-antenna_x+antenna_distance/2+start_x))**2 + y_coordinates**2)    #Backward wave.
+    distance_b = np.sqrt((x_coordinates-(end_x-antenna_x+start_x))**2 + y_coordinates**2-(antenna_distance/2)**2)    #Backward wave.
     
     distance_image = distance_a + distance_b
     
     #Build Interpolator.
-    f_abs = interpolate.interp1d(distance_VNA, np.abs((signal_VNA)), kind = 'cubic')
-    f_angle = interpolate.interp1d(distance_VNA, np.unwrap(np.angle((signal_VNA))), kind = 'cubic')
+    f_abs = interpolate.interp1d(distance_VNA, np.abs((spectrum_VNA)), kind = 'cubic')
+    f_angle = interpolate.interp1d(distance_VNA, np.unwrap(np.angle((spectrum_VNA))), kind = 'cubic')
     
     image_matrix_cache_abs = f_abs(distance_image)
     image_matrix_cache_angle = f_angle(distance_image)
@@ -146,6 +159,8 @@ cax = ax.figure.axes[-1]
 cax.tick_params(labelsize=22.5)
 
 plt.show()
+
+#Save result in .pkl-file.
 
 filepath = r'{0}\Pickle Files\final_image_VNA.pkl'.format(current_dir)
         

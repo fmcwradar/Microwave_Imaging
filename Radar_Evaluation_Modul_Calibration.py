@@ -2,9 +2,6 @@ from pandas import read_csv
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
-from scipy import signal
-import pickle
-import os
 
 class radar_measurement_evaluation:
 
@@ -23,16 +20,10 @@ class radar_measurement_evaluation:
         windowing: (bool) set to "True" if windowing shall be used.
         ideal: (bool) set to "True" if ideal data generated with "Ideal_Radar_Data_Generator.py" is used.
         swap_IQ: (bool) set to "True" if IF-I is sampled with channel 2 of the oscilloscope and IF-Q with channel 1.
-        calibration: (bool) set to "True" if the free space calibration shall be applied. For ideal data this has to be set to "False".
-        plotting: (bool) set to "True" if plots of intermediate results shall be saved.
-        filtering: (bool) set to "True" if a digital band-pass filter shall be applied.
-        fc_low: (float) lower cut-off frequency of the band-pass filter.
-        fc_high: (float) upper cut-off frequency of the band-pass filter.
-        filterorder: (int) filteroder of the the band-pass filter.
     """
     
-    def __init__(self,path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,plotting,filtering,fc_low,fc_high,filterorder):
-        self.path = path_csv
+    def __init__(self,path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ):
+        self.path = path
         self.name = name
         self.bandwidth = B
         self.chirp_time = T_c
@@ -44,13 +35,6 @@ class radar_measurement_evaluation:
         self.windowing = windowing
         self.ideal = ideal
         self.swap_IQ = swap_IQ
-        self.calibration = calibration
-        self.plotting = plotting
-        self.filtering = filtering
-        self.fc_low = fc_low
-        self.fc_high = fc_high
-        self.filterorder = filterorder
-        
         if self.ideal == True:
             self.number_of_ramps = 1
 
@@ -75,7 +59,8 @@ class radar_measurement_evaluation:
         self.timestep = timestep
         self.number_of_points = number_of_points
         self.samples_per_ramp = int((self.chirp_time)/(timestep))
-                
+        
+         
     def find_starting_point(self):
         #This function determines the starting points of the up-ramps.
         #The ideal is only one ramp so it is not necessary to determine the starting point.
@@ -127,7 +112,8 @@ class radar_measurement_evaluation:
         fa = (1/dt) # scan frequency
         frequency_vector = np.linspace(0, fa, self.samples_per_ramp, endpoint=True)
         
-        self.IF = frequency_vector
+        self.IF_frequency = frequency_vector
+        self.time = time
         
         #Calculate distance based on the frequency_vector.
         distance = frequency_vector*self.speed/(2*S)
@@ -150,7 +136,6 @@ class radar_measurement_evaluation:
             start = self.lineup[counter-1]   #Starting point is at the transition from down-ramp to up-ramp. This why you have to "jump" one ramp forward to start with the negative slope.
             stop = start + self.samples_per_ramp
         
-        self.time = time
         self.matrix_up = data_matrix_up
         self.distance = distance
 
@@ -159,110 +144,29 @@ class radar_measurement_evaluation:
         data_matrix_up = self.matrix_up
         #Calculate average of up-ramp data.
         mean_value_up_raw = (np.mean(data_matrix_up, axis = 0))
-        
-        self.IFsignal = mean_value_up_raw
-        
-        #Generate Bandpass Filter
-        sos = signal.butter(self.filterorder, [self.fc_low,self.fc_high], 'bp', fs=1/self.timestep, output='sos')
-        
-        if self.filtering == True:
-        
-            filtered_signal = signal.sosfiltfilt(sos, mean_value_up_raw)
-        
-        if self.filtering == False:
-        
-            filtered_signal = mean_value_up_raw
-        
-        current_dir = os.path.dirname(__file__)
-        
-        #Check if file exists.
-        if os.path.isfile(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir)) == False:
-            print("Error: No calibration file in folder!")
-            exit(0)
-        
-        with open(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir), 'rb') as file: 
-            
-            # Call load method to deserialze. 
-            error_function = pickle.load(file) 
-                
-        if self.calibration == True:
-        
-            if self.windowing == True:
-                mean_value_up_final = filtered_signal*np.kaiser(self.samples_per_ramp, beta = 3.5)*error_function
+         
+        if self.windowing == True:
+            mean_value_up_final = mean_value_up_raw*np.kaiser(self.samples_per_ramp, beta = 3.5)
 
-            if self.windowing == False:
-                mean_value_up_final = filtered_signal*error_function
-
-        if self.calibration == False:
-     
-            if self.windowing == True:
-                mean_value_up_final = filtered_signal*np.kaiser(self.samples_per_ramp, beta = 3.5)
-
-            if self.windowing == False:
-                mean_value_up_final = filtered_signal
-    
+        if self.windowing == False:
+            mean_value_up_final = mean_value_up_raw
+         
         #Calculate the IF spectrum.
         distance_corrected = np.linspace(self.distance[0], self.distance[len(self.distance)-1], self.total) #Adjust distance vector to the zero-padding.
         
-        frequency_corrected = np.linspace(self.IF[0], self.IF[len(self.IF)-1], self.total) #Adjust frequency vector to the zero-padding.
+        frequency_corrected = np.linspace(self.IF_frequency[0], self.IF_frequency[len(self.IF_frequency)-1], self.total) #Adjust IF frequency vector to the zero-padding.
         
         compensation_term = 2*np.pi*self.f0*(2*distance_corrected)/self.speed
 
         spectrum_up = np.fft.fft(mean_value_up_final, norm = 'forward', n = self.total)
-                
+        
         spectrum_up_corr = spectrum_up*np.exp(-1j*compensation_term)    #Multiply the range FFT with the phase correction term.
         
-        self.spectrum_raw = spectrum_up
         self.signal_up = mean_value_up_final
-        self.spectrum_up = spectrum_up_corr
+        self.spectrum_up = spectrum_up
         self.distance_corrected = distance_corrected
-        self.frequency_corrected = frequency_corrected
-        
-    def plot_results(self):
+        self.IF_frequency_corrected = frequency_corrected
 
-        current_dir = os.path.dirname(__file__)
-
-        #Plot IF signal.
-        filepath = r'{0}\Results\Plot_IF_Signal\{1}.pdf'.format(current_dir,self.name)
-        
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        
-        plt.style.use(r"{0}\Style_MM.mplstyle".format(current_dir))
-        plt.plot(self.time*1e6, np.real(self.IFsignal)*1000, label = "IF-I")
-        plt.plot(self.time*1e6, np.imag(self.IFsignal)*1000, label = "IF-Q")
-        plt.legend(loc = 'best')
-        plt.xlabel("Time (µs)")
-        plt.ylabel("Amplitude (mV)")
-        plt.ylim(-500,500)
-        plt.savefig(filepath, format="pdf")
-        plt.clf()
-        plt.cla()
-
-        #Plot IF-Spectrum.
-        filepath = r'{0}\Results\Plot_IF_Spectrum\{1}.pdf'.format(current_dir,self.name)
-        
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        
-        plt.style.use(r"{0}\Style_MM.mplstyle".format(current_dir))
-        
-        fig, ax1 = plt.subplots()
-        ax1.plot(self.distance_corrected[0:int(self.total/2)], 20*np.log10(np.abs(self.spectrum_raw[0:int(self.total/2)])))
-        ax2 = ax1.twiny()
-        ax2.plot(self.frequency_corrected[0:int(self.total/2)]/1e3, 20*np.log10(np.abs(self.spectrum_raw[0:int(self.total/2)])))
-        ax1.set_xlabel("Distance (m)")
-        ax2.set_xlabel("Frequency (kHz)")
-        ax1.set_ylabel("Amplitude (dBV)")
-        ax1.set_xticks([0,1,2,3,4,5,6,7,8,9])
-        ax2.set_xticks([0,500,1000,1500,2000,2500])
-        ax1.grid(True) 
-        ax2.grid(False) 
-        plt.savefig(filepath, format="pdf")
-        plt.clf()
-        plt.cla()
-
-        plt.close('all')
 
     def run_radar_evaluation(self):
     
@@ -270,6 +174,3 @@ class radar_measurement_evaluation:
         self.find_starting_point()  
         self.collect_ramp_data()
         self.average_data_calculate_FTT()
-        
-        if self.plotting == True:
-            self.plot_results()

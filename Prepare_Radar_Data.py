@@ -3,17 +3,28 @@ import scipy.constants as sc
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-#Import of the Radar Measurement Evaluation Modul.
+import pathlib
+#Import of the Radar Measurement Evaluation Modul and the Radar_Imaging_Modul.
 from Radar_Evaluation_Modul import radar_measurement_evaluation
+from Radar_Imaging_Modul import radar_imaging
 #Get current directory.
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
-path = r"{0}\Ideal Data Radar".format(current_dir)
+path_csv = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Bassi"
 number_of_files = 45
+#Check if all necessary folders exist and if not create them.
+path = pathlib.Path(r'{0}\Pickle Files'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
+path = pathlib.Path(r'{0}\Results\Plot_IF_Signal'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
+path = pathlib.Path(r'{0}\Results\Plot_IF_Spectrum'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
+
+number_of_measurements = 46
 
 file_names = []
 
-for number in range(0, number_of_files+1):
+for number in range(0, number_of_measurements):
     file_names.append("{0}".format(number))
 
 #Define settings for Radar_Evaluation_Modul.
@@ -23,48 +34,41 @@ B = (f1-f0)
 T_c = 200*1e-6
 c0 = sc.speed_of_light
 number_of_ramps = 300
-total = 4096
+total = 8192
 windowing = True
-ideal = True
-swap_IQ = False
+ideal = False
+swap_IQ = True
+calibration = True
+plotting = False
+filtering = True
+fc_low = 750e3
+fc_high = 900e3
+filterorder = 10
+#End of define settings for Radar_Evaluation_Modul.
 
-measurement_list_no_target = []
-measurement_list_time_domain_up = []
-measurement_list_time_domain_up = []
-
-spectrum_matrix = np.zeros((len(file_names),total), dtype = complex)
+list_of_measurements = []
 
 #Iterate over the measurements.
 for count, name in enumerate(file_names):
-    print(count)
-    single_measurement = radar_measurement_evaluation(path,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ)
+    print("Evaluated Measurement {0}".format(count))
+    single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,plotting,filtering,fc_low,fc_high,filterorder)
     single_measurement.run_radar_evaluation()
-    spectrum_matrix[count,:] = single_measurement.spectrum_up
-    
-distance_corrected = single_measurement.distance_corrected   
-      
-#Save the results in pickle files.
-import pickle
-import os   
+    list_of_measurements.append(single_measurement)
 
-current_dir = os.path.dirname(__file__)
+#Define settings for Radar_Imaging_Modul.
+offset = 2.355
+distance = single_measurement.distance_corrected
+number_of_points_x = 401
+number_of_points_y = 401
+start_x = 0
+end_x = 40
+start_y = 50
+end_y = 90
+antenna_distance = 10
+antenna_start = 0
+antenna_end = 45
+dynamic_range = 30
+#End of define settings for Radar_Imaging_Modul.
 
-filepath = r'{0}\Pickle Files\spectrum.pkl'.format(current_dir)
-        
-if os.path.exists(filepath):
-    os.remove(filepath)
-
-filepath = r'{0}\Pickle Files\distance.pkl'.format(current_dir)
-        
-if os.path.exists(filepath):
-    os.remove(filepath)
-            
-with open(r'{0}\Pickle Files\spectrum.pkl'.format(current_dir), 'wb') as file: 
-      
-    # A new file will be created.
-    pickle.dump(spectrum_matrix, file) 
-
-with open(r'{0}\Pickle Files\distance.pkl'.format(current_dir), 'wb') as file: 
-      
-    # A new file will be created. 
-    pickle.dump(distance_corrected, file) 
+radar_imaging = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements)
+radar_imaging.run_radar_imaging()
