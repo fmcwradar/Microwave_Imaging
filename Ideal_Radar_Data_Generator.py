@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import scipy.constants as sc
 import csv
 import os
+import pathlib
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(10,70),(30,60)]
+targets = [(10,70),(30,60),(20,65)]
 #Define number of points.
 points = 1000
 #Define bandwidth of the FMCW radar system.
@@ -24,6 +25,9 @@ end_antenna = 45
 increment_antenna = 1
 #Find current folder.
 current_dir = os.path.dirname(__file__)
+#Check if necessary folder exists and if not create it.
+path = pathlib.Path(r'{0}\Ideal Data Radar'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
 
 time = np.linspace(0, T_c, int(points))
 

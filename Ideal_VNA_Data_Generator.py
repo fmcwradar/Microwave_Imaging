@@ -7,9 +7,10 @@ import skrf as rf
 from skrf import Frequency
 from skrf.constants import to_meters
 from skrf.media import MLine, RectangularWaveguide
+import pathlib
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(10,70),(30,60)]
+targets = [(10,70),(30,60),(20,65)]
 #Define number of points.
 points = 801
 #Define start frequency.
@@ -31,6 +32,11 @@ mlin  =  MLine(frequency_vector,w = 0.2e-3,h = 100e-6,t = 18e-6,ep_r = 3.66,rho 
 #Determine phase velocity.
 v_p = np.real(mlin.v_p)
 antenna_positions = np.linspace(start_antenna, end_antenna, int((end_antenna-start_antenna)/increment_antenna + 1))
+#Check if necessary folder exists and if not create it.
+path = pathlib.Path(r'{0}\Ideal Data VNA'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
+
+
 
 counter = 0
 
