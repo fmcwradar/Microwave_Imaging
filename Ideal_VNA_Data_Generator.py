@@ -10,7 +10,7 @@ from skrf.media import MLine, RectangularWaveguide
 import pathlib
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(10,70),(30,60),(20,65)]
+targets = [(20,60)]
 #Define number of points.
 points = 801
 #Define start frequency.
