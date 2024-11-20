@@ -10,7 +10,7 @@ from Radar_Imaging_Modul import radar_imaging
 #Get current directory.
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
-path_csv = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Bassi"
+path_csv = r"{0}\Ideal Data Radar".format(current_dir)
 number_of_files = 45
 #Check if all necessary folders exist and if not create them.
 path = pathlib.Path(r'{0}\Pickle Files'.format(current_dir))
@@ -36,11 +36,11 @@ c0 = sc.speed_of_light
 number_of_ramps = 300
 total = 8192
 windowing = True
-ideal = False
-swap_IQ = True
-calibration = True
+ideal = True
+swap_IQ = False
+calibration = False
 plotting = False
-filtering = True
+filtering = False
 fc_low = 750e3
 fc_high = 900e3
 filterorder = 10
@@ -56,7 +56,7 @@ for count, name in enumerate(file_names):
     list_of_measurements.append(single_measurement)
 
 #Define settings for Radar_Imaging_Modul.
-offset = 2.355
+offset = 0  #This value must be zero for ideal data.
 distance = single_measurement.distance_corrected
 number_of_points_x = 401
 number_of_points_y = 401

@@ -9,9 +9,9 @@ from skrf.constants import to_meters
 from skrf.media import MLine, RectangularWaveguide
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(10,70),(30,90),(20,80),(35,70)]
+targets = [(10,70),(30,60)]
 #Define number of points.
-points = 201
+points = 801
 #Define start frequency.
 f_0 = 6e9
 #Define stop frequency.
@@ -24,8 +24,6 @@ end_antenna = 45
 increment_antenna = 1
 #Find current folder.
 current_dir = os.path.dirname(__file__)
-
-
 #Create frequency vector.
 frequency_vector = Frequency(f_0,f_1,points,'Hz')
 #Create substrate from parameters.

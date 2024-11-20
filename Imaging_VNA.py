@@ -8,11 +8,12 @@ import scipy
 from scipy import signal
 from scipy.constants import speed_of_light
 from scipy import interpolate
+import pathlib
 
 current_dir = os.path.dirname(__file__)
 
 #Specifiy path of the corresponding .s2p files.
-path = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Klotz 1"
+path = r"{0}\Ideal Data VNA".format(current_dir)
 
 #General settings of the grid.
 number_of_points_x = 401
@@ -22,8 +23,8 @@ end_x = 40
 start_y = 50
 end_y = 90
 #Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
-offset = 142
-#Define if the measurement shall be calibrated. This value must be "False" for ideal data.
+offset = 0
+#Define if the measurement shall be calibrated. This value must "False" if ideal data shall be used. 
 calibration = False
 
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
@@ -74,16 +75,17 @@ for antenna_x in antenna_positions:
 
     print('Frequency Sweep: ', fBu, fBo, df, N)
 
-    with open(r"{0}\Pickle Files\error_function_VNA.pkl".format(current_dir), 'rb') as file: 
-            
-            # Call load method to deserialze. 
-            error_function = pickle.load(file) 
-    
     #Use window function.
     window = np.kaiser(N, beta = 3.5)
     
     if calibration == True:
-        Sf = S*window*error_function
+    
+         with open(r"{0}\Pickle Files\error_function_VNA.pkl".format(current_dir), 'rb') as file: 
+            
+            # Call load method to deserialze. 
+            error_function = pickle.load(file) 
+    
+         Sf = S*window*error_function
     if calibration == False:
         Sf = S*window
     
@@ -161,6 +163,10 @@ cax.tick_params(labelsize=22.5)
 plt.show()
 
 #Save result in .pkl-file.
+
+#Check if the necessary folder exists and if not creates it.
+path = pathlib.Path(r'{0}\Pickle Files'.format(current_dir))
+path.mkdir(parents=True, exist_ok=True)
 
 filepath = r'{0}\Pickle Files\final_image_VNA.pkl'.format(current_dir)
         

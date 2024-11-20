@@ -176,14 +176,15 @@ class radar_measurement_evaluation:
         current_dir = os.path.dirname(__file__)
         
         #Check if file exists.
-        if os.path.isfile(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir)) == False:
-            print("Error: No calibration file in folder!")
-            exit(0)
+        if self.calibration == "True":
+            if os.path.isfile(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir)) == False:
+                print("Error: No calibration file in folder!")
+                exit(0)
         
-        with open(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir), 'rb') as file: 
-            
-            # Call load method to deserialze. 
-            error_function = pickle.load(file) 
+            with open(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir), 'rb') as file: 
+                
+                # Call load method to deserialze. 
+                error_function = pickle.load(file) 
                 
         if self.calibration == True:
         
@@ -234,7 +235,6 @@ class radar_measurement_evaluation:
         plt.legend(loc = 'best')
         plt.xlabel("Time (µs)")
         plt.ylabel("Amplitude (mV)")
-        plt.ylim(-500,500)
         plt.savefig(filepath, format="pdf")
         plt.clf()
         plt.cla()
