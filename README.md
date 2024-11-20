@@ -21,7 +21,7 @@ For the image generation with the FMCW radar system you have to run the file `Pr
 
 First the phase compensated range FFT of every measurement of each measurement is computed and combined in a matrix. This matrix and the corresponding distance vector is saved in two pickle files `spectrum.pkl` and `distance_corrected.pkl`. For this, it is necessary that there is a folder named 'Pickle Files' in the directory. If it does not already exists it will be created. Then the image is calculated based on `spectrum.pkl` and `distance_corrected.pkl`. The input data for `Prepare_Radar_Data.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement number, e.g. `0.csv`, `1.csv`, `2.csv` and so on.
 
-The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`. This file contains the class 'radar_measurement_evaluation'. The imaging steps are implemented in `Radar_Imaging_Modul.py`.
+The actual preparation of the radar data is done in `Radar_Evaluation_Modul.py`. This file contains the class 'radar_measurement_evaluation'. The imaging steps are implemented in `Radar_Imaging_Modul.py`. This file contains the class 'radar_imaging'.
 
 ## Documentation
 All the signal processing steps that are implemented can be found in the `.pdf` file 'Flow_Chart_Comparison'.
