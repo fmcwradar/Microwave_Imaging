@@ -77,38 +77,51 @@ class radar_measurement_evaluation:
         self.samples_per_ramp = int((self.chirp_time)/(timestep))
                 
     def find_starting_point(self):
-        #This function determines the starting points of the up-ramps.
-        #The ideal is only one ramp so it is not necessary to determine the starting point.
+        # This function determines the starting points of the up-ramps.
+        # The ideal is only one ramp so it is not necessary to determine the starting point.
         if self.ideal == True:
-            lineup = [0,0]
-        
+            lineup = [0, 0]
+
         if self.ideal == False:
-        
-            data_slice = self.I+1j*self.Q
-         
-            phase_slice = np.unwrap(np.angle(data_slice))
-            
-            starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
-            
-            ramps_in_samples = int(len(data_slice)/(2*self.samples_per_ramp))-1
-            
+
+            data_slice = self.I + 1j * self.Q
+
+            phase_slice_unfiltered = np.unwrap(np.angle(data_slice))
+
+            # Generate low-pass filter
+            sos_phase = signal.butter(3, (1 / self.chirp_time) * 2, 'lp', fs=1 / self.timestep, output='sos')
+
+            # Filter the phase slice to make the detection easier.
+            phase_slice = signal.sosfiltfilt(sos_phase, phase_slice_unfiltered)
+
+            starting_point_ramp = np.argmin(phase_slice[0:int(2.5 * self.samples_per_ramp)])
+
+            ramps_in_samples = int(len(data_slice) / (2 * self.samples_per_ramp)) - 1
+
             offset = 0
-            
+
             lineup = []
-            
-            #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
-            #starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
-            #at the corresponding index. If not then starting_point_ramp is decreased by one.
+
+            # This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
+            # starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
+            # at the corresponding index. If not then starting_point_ramp is decreased by one.
             for ramp_index in range(0, ramps_in_samples):
-                    
-                potential_start = int(starting_point_ramp + (2*self.samples_per_ramp)*ramp_index + offset)
-                
-                if phase_slice[potential_start] < phase_slice[potential_start-1] and phase_slice[potential_start] < phase_slice[potential_start+1]:
-                    
-                    lineup.append(potential_start)
-                    
+
+                potential_start = int(starting_point_ramp + (2 * self.samples_per_ramp) * ramp_index + offset)
+
+                # print(potential_start)
+
+                if phase_slice[potential_start] < phase_slice[potential_start - 1] and phase_slice[potential_start] < \
+                        phase_slice[potential_start + 1]:
+
+                    lineup.append(potential_start + 1)
+
+                elif phase_slice[potential_start] > phase_slice[potential_start + 1]:
+
+                    offset = offset + 1
+
                 else:
-                    
+
                     offset = offset - 1
 
         self.lineup = lineup
