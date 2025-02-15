@@ -7,7 +7,6 @@ import pathlib
 #Import of the Radar Measurement Evaluation Modul.
 from Radar_Evaluation_Modul import radar_measurement_evaluation
 from Radar_Imaging_Modul import radar_imaging
-from Radar_Comparison import radar_comparison
 #Get current directory.
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
