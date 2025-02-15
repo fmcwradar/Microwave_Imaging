@@ -29,9 +29,11 @@ class radar_measurement_evaluation:
         fc_low: (float) lower cut-off frequency of the band-pass filter.
         fc_high: (float) upper cut-off frequency of the band-pass filter.
         filterorder: (int) filteroder of the the band-pass filter.
+        single_measurement: (bool) set to "True" if only the IF spectrum of the first measurement shall be plotted. 
+        distance_offset: (float) distance offset due to cables, adapters etc. (m).
     """
     
-    def __init__(self,path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,plotting,filtering,fc_low,fc_high,filterorder):
+    def __init__(self,path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,plotting,filtering,fc_low,fc_high,filterorder,single_measurement,distance_offset):
         self.path = path_csv
         self.name = name
         self.bandwidth = B
@@ -45,11 +47,12 @@ class radar_measurement_evaluation:
         self.ideal = ideal
         self.swap_IQ = swap_IQ
         self.calibration = calibration
-        self.plotting = plotting
         self.filtering = filtering
         self.fc_low = fc_low
         self.fc_high = fc_high
         self.filterorder = filterorder
+        self.single_measurement = single_measurement
+        self.distance_offset = distance_offset
         
         if self.ideal == True:
             self.number_of_ramps = 1
@@ -77,42 +80,35 @@ class radar_measurement_evaluation:
         self.samples_per_ramp = int((self.chirp_time)/(timestep))
                 
     def find_starting_point(self):
-        # This function determines the starting points of the up-ramps.
-        # The ideal is only one ramp so it is not necessary to determine the starting point.
+        #This function determines the starting points of the up-ramps.
+        #The ideal is only one ramp so it is not necessary to determine the starting point.
         if self.ideal == True:
-            lineup = [0, 0]
-
+            lineup = [0,0]
+        
         if self.ideal == False:
-
-            data_slice = self.I + 1j * self.Q
-
-            phase_slice_unfiltered = np.unwrap(np.angle(data_slice))
-
-            # Generate low-pass filter
-            sos_phase = signal.butter(3, (1 / self.chirp_time) * 2, 'lp', fs=1 / self.timestep, output='sos')
-
-            # Filter the phase slice to make the detection easier.
-            phase_slice = signal.sosfiltfilt(sos_phase, phase_slice_unfiltered)
-
-            starting_point_ramp = np.argmin(phase_slice[0:int(2.5 * self.samples_per_ramp)])
-
-            ramps_in_samples = int(len(data_slice) / (2 * self.samples_per_ramp)) - 1
-
+        
+            data_slice = self.I+1j*self.Q
+         
+            phase_slice = np.unwrap(np.angle(data_slice))
+            
+            starting_point_ramp = np.argmin(phase_slice[0:int(2.5*self.samples_per_ramp)])
+            
+            ramps_in_samples = int(len(data_slice)/(2*self.samples_per_ramp))-1
+            
             offset = 0
-
+            
             lineup = []
-
-            # This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
-            # starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
-            # at the corresponding index. If not then starting_point_ramp is decreased by one.
+            
+            #This part is necessary because it can happen that the xth ramp does not start at starting_point_ramp+2*samples_per_ramp*x, but at
+            #starting_point_ramp+2*samples_per_ramp*x-1. This is why every potential starting point gets checked if there is really a phase jump
+            #at the corresponding index. If not then starting_point_ramp is decreased by one.
             for ramp_index in range(0, ramps_in_samples):
 
                 potential_start = int(starting_point_ramp + (2 * self.samples_per_ramp) * ramp_index + offset)
 
                 # print(potential_start)
 
-                if phase_slice[potential_start] < phase_slice[potential_start - 1] and phase_slice[potential_start] < \
-                        phase_slice[potential_start + 1]:
+                if phase_slice[potential_start] < phase_slice[potential_start - 1] and phase_slice[potential_start] < phase_slice[potential_start + 1]:
 
                     lineup.append(potential_start + 1)
 
@@ -123,7 +119,7 @@ class radar_measurement_evaluation:
                 else:
 
                     offset = offset - 1
-
+                    
         self.lineup = lineup
         
     def collect_ramp_data(self):  
@@ -187,20 +183,44 @@ class radar_measurement_evaluation:
             filtered_signal = mean_value_up_raw
         
         current_dir = os.path.dirname(__file__)
+           
+        if self.calibration == True:
         
-        #Check if file exists.
-        if self.calibration == "True":
+            #Check if error-function exists.
             if os.path.isfile(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir)) == False:
                 print("Error: No calibration file in folder!")
+                print("Evaluation will be aborted!")
                 exit(0)
         
+            #Load error-function.
             with open(r"{0}\Pickle Files\error_function_radar.pkl".format(current_dir), 'rb') as file: 
                 
                 # Call load method to deserialze. 
-                error_function = pickle.load(file) 
-                
-        if self.calibration == True:
+                error_function = pickle.load(file)
         
+            #Check if the filter settings are identical to the settings used for the generation of the error-function.
+            with open(r"{0}\Calibration_Settings.txt".format(current_dir), 'r') as file:
+                # Read each line in the file.
+                linecount = 0
+                for line in file:
+                    # Print each line
+                    if linecount == 1:
+                        filterorder_cal = float(line.strip())
+                    
+                    if linecount == 2:
+                        fc_low_cal = float(line.strip()[:-3])
+        
+                    if linecount == 3:
+                        fc_high_cal = float(line.strip()[:-3])
+                    
+                    linecount = linecount + 1
+            
+            #Check if the correct filter is used.
+            if filterorder_cal != self.filterorder or fc_low_cal != self.fc_low or fc_high_cal != self.fc_high:
+                print("Error: Filter settings of measurement and error-function do not match!")
+                print("Evaluation will be aborted!")
+                exit(0)
+
             if self.windowing == True:
                 mean_value_up_final = filtered_signal*np.kaiser(self.samples_per_ramp, beta = 3.5)*error_function
 
@@ -232,6 +252,27 @@ class radar_measurement_evaluation:
         self.distance_corrected = distance_corrected
         self.frequency_corrected = frequency_corrected
         
+        if self.single_measurement == True:
+            
+            plt.style.use(r"{0}\Style_MM.mplstyle".format(current_dir))
+            
+            plt.figure("Amplitude vs. Distance")
+            plt.plot(distance_corrected, 20*np.log10(np.abs(spectrum_up)))
+            plt.xlabel("Distance (m)")
+            plt.ylabel("Amplitude (dBV)")
+            
+            distance_corrected_offset = [entry - self.distance_offset for entry in distance_corrected]
+            
+            plt.figure("Amplitude vs. Distance Offset Subtracted")
+            plt.plot(distance_corrected_offset, 20*np.log10(np.abs(spectrum_up)))
+            plt.xlabel("Distance (m)")
+            plt.ylabel("Amplitude (dBV)")
+            
+            plt.show()
+            
+            exit(0)
+        
+        
     def plot_results(self):
 
         current_dir = os.path.dirname(__file__)
@@ -248,6 +289,7 @@ class radar_measurement_evaluation:
         plt.legend(loc = 'best')
         plt.xlabel("Time (µs)")
         plt.ylabel("Amplitude (mV)")
+        plt.ylim(-500,500)
         plt.savefig(filepath, format="pdf")
         plt.clf()
         plt.cla()
