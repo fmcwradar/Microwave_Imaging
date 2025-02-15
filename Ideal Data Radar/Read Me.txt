@@ -1,1 +1,0 @@
-This folder is necessary to directly use the scripts with ideal data.
