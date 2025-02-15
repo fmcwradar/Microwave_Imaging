@@ -216,8 +216,3 @@ plt.xlabel("Distance (m)")
 plt.ylabel("Normalized Amplitude (dB)")
 plt.legend(loc = 'best')
 plt.show()
-
-
-
-
-
