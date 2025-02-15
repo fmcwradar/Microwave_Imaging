@@ -47,6 +47,7 @@ class radar_measurement_evaluation:
         self.ideal = ideal
         self.swap_IQ = swap_IQ
         self.calibration = calibration
+        self.plotting = plotting
         self.filtering = filtering
         self.fc_low = fc_low
         self.fc_high = fc_high
