@@ -41,13 +41,13 @@ windowing = True
 ideal = False
 swap_IQ = True
 calibration = True
+plotting = False
 filtering = True
 fc_low = 750e3
 fc_high = 900e3
 filterorder = 10
 single_measurement = False
 offset = 2.355
-plotting = True
 #End of define settings.
 
 list_of_measurements = []
