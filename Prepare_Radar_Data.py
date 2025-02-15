@@ -38,7 +38,7 @@ number_of_ramps = 100
 total = 8192
 windowing = True
 ideal = False
-swap_IQ = True
+swap_IQ = True       #Set to "False" for ideal data.
 calibration = True
 plotting = False
 filtering = True
@@ -46,7 +46,7 @@ fc_low = 750e3
 fc_high = 900e3
 filterorder = 10
 single_measurement = False
-offset = 2.355
+offset = 2.355        #Set to 0 for ideal data.
 #End of define settings.
 
 list_of_measurements = []
