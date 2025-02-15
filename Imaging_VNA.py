@@ -1,3 +1,7 @@
+"""
+    This script is used to generate an image based on measured S-parameters.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import skrf as rf
@@ -13,7 +17,7 @@ import pathlib
 current_dir = os.path.dirname(__file__)
 
 #Specifiy path of the corresponding .s2p files.
-path = r"{0}\Ideal Data VNA".format(current_dir)
+path = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Wasser 1 Run 2"
 
 #General settings of the grid.
 number_of_points_x = 401
@@ -22,11 +26,11 @@ start_x = 0
 end_x = 40
 start_y = 50
 end_y = 90
-#Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
-offset = 0
+#Define the offset (cm) of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
+offset = 141.3
 #Define if the measurement shall be calibrated. This value must "False" if ideal data shall be used. 
-calibration = False
-
+calibration = True
+#Create empty image matrix.
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
 
 c0 = speed_of_light
@@ -35,7 +39,10 @@ c0 = speed_of_light
 nPad = 8192 #Zero Padding
 
 #Define antenna positions.
-antenna_positions = np.linspace(0, 45, 46)
+antenna_start = 0
+antenna_end = 45
+number_of_measurements = 46
+antenna_positions = np.linspace(antenna_start, antenna_end, number_of_measurements)
 antenna_counter = 0
 antenna_distance = 10   #Difference between the center positions of TX and RX antenna.
 
@@ -47,15 +54,17 @@ for antenna_x in antenna_positions:
 
     print(antenna_x)
 
-    #Load s-parameter of measurement without a target.
-    net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Leermessung Sweep\{0}.s2p".format(int(antenna_counter)))
-    s21_match = net.s[:,1,0]
-    
     #Prepare s-parameter.
     net = rf.Network("{0}\{1}.s2p".format(path, int(antenna_counter)))
     
     if calibration == True:
+        
+        #Load s-parameter of measurement without a target.
+        net_match = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Leermessung Sweep\{0}.s2p".format(int(antenna_counter)))
+        s21_match = net_match.s[:,1,0]
+    
         s21_raw = net.s[:,1,0]-s21_match
+        
     if calibration == False:
         s21_raw = net.s[:,1,0]
     
@@ -79,13 +88,13 @@ for antenna_x in antenna_positions:
     window = np.kaiser(N, beta = 3.5)
     
     if calibration == True:
-    
+        
+        #Load error_function.
          with open(r"{0}\Pickle Files\error_function_VNA.pkl".format(current_dir), 'rb') as file: 
-            
-            # Call load method to deserialze. 
             error_function = pickle.load(file) 
     
          Sf = S*window*error_function
+         
     if calibration == False:
         Sf = S*window
     
@@ -93,9 +102,7 @@ for antenna_x in antenna_positions:
     Lmax = 0.5*c0/df
     print('Lmax ',Lmax)
     lengthAxis = np.linspace(0, Lmax, nPad, endpoint=True)
-    Tmax = 0.5/df
-    timeAxis = np.linspace(0, Tmax, nPad, endpoint=True)
-    
+
     #Fill the spectrum with corresponding number of zeroes on the left side.
     Nu, dum = divmod(fBu, df)
     if dum > 0.01:
