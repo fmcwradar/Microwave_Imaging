@@ -27,6 +27,7 @@ windowing = False   #Has to be "False" for generating the error-function.
 ideal = False
 swap_IQ = True
 calibration = False #Has to be "False" for generating the error-function.
+plotting = False
 filtering = True    #Has to be "True" for generating the error-function.
 fc_low = 750e3
 fc_high = 900e3
@@ -49,7 +50,7 @@ f.close()
 #Iterate over the measurements.
 for count, name in enumerate(file_names):
     print(count)
-    single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,filtering,fc_low,fc_high,filterorder,single_measurement,offset)
+    single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,plotting,filtering,fc_low,fc_high,filterorder,single_measurement,offset)
     single_measurement.run_radar_evaluation()
     
     if count == 0:
