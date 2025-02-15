@@ -11,7 +11,7 @@ from Radar_Evaluation_Modul import radar_measurement_evaluation
 #Get current directory.
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
-path_csv = r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Metallplatte_0"
+path_csv = 
 
 file_names = ["8","9"]      #The first measurement has to be the calibration object (metal plate). The second measurement can be anything.
 
