@@ -142,10 +142,10 @@ plt.style.use(r"{0}\Style_MM.mplstyle".format(current_dir))
 #Evaluate measurement of calibration object.
 
 #Load s-parameter of measurement without target.
-net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Leermessung Cal\8.s2p")
+net = rf.Network(path_to_measurement)
 s21_absorber = net.s[:,1,0]
 #Load s-parameter of metal plate.
-net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Metallplatte_0\8.s2p")
+net = rf.Network(path_to_measurement)
 s21_raw = net.s[:,1,0]
 #Subtract s-parameter of absorber from metal plate measurement.
 s21_dut = s21_raw-s21_absorber
@@ -164,7 +164,7 @@ plt.show()
 
 
 #Generate ideal signal.
-ideal_distance = 2.0166 #Define ideal_distance according to the measurement of the metal plate.
+ideal_distance =  #Define ideal_distance according to the measurement of the metal plate.
 output = signal_processing_ideal(frequency_raw,ideal_distance,start_frequency, stop_frequency, nPad, c0)
 
 distance_vector = output[0]
@@ -189,10 +189,10 @@ with open(r"{0}\Pickle Files\error_function_VNA.pkl".format(current_dir), 'wb') 
 #Calibrate an exemplary measurement.
 
 #Load s-parameter of absorber.
-net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Leermessung Cal\13.s2p")
+net = rf.Network(path_to_measurement)
 s21_absorber = net.s[:,1,0]
 #Load s-parameter of metal plate.
-net = rf.Network(r"C:\Users\Martin\Desktop\Messungen 06-11-2024\Run 3\Dual_Target\13.s2p")
+net = rf.Network(path_to_measurement)
 s21_raw = net.s[:,1,0]
 #Subtract s-parameter of absorber from metal plate measurement.
 s21_dut = s21_raw-s21_absorber
