@@ -4,6 +4,6 @@ The mixer on the transceiver PCB is the HMC8191 by Analog Devices, which is an I
 
 ![Time_Large](https://github.com/user-attachments/assets/bc124680-d291-40a3-bdf0-1889387b5a60)
 
-For signal processing, either the up or down ramp must be used. Additionally, it is possible to average the measurements of multiple ramps to reduce noise. The next image shows the IF signal of an up ramp.
+For signal processing, either the up or down ramp must be used. Additionally, it is possible to average the measurements of multiple ramps to reduce noise. The next image shows the IF signal of an up ramp. It can be seen that the amplitude at the beginning of the ramp is significantly higher than at the end. This is related to the hardware, which is described in detail in the related papers.
 
 ![Time_Small](https://github.com/user-attachments/assets/f8210b89-09b1-473a-af36-e99e1d003d18)
