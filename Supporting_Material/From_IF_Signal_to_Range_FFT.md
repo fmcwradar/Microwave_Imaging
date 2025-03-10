@@ -14,7 +14,7 @@ Once the IF signal is available in this form, calculating the fast-Fourier trans
 
 ![Spectrum_IF](https://github.com/user-attachments/assets/64b7fbfe-ad3a-401d-ab40-3e90069d70e2)
 
-For an FMCW radar system this can be modified into the amplitude vs. distance plot.
+For an FMCW radar system, this can be modified into the amplitude vs. distance plot.
 
 ![Spectrum_Distance](https://github.com/user-attachments/assets/9cbb493d-d625-4737-9e74-fe2639990f3c)
 
