@@ -10,7 +10,7 @@ For signal processing, either the up or down ramp must be used. Additionally, it
 
 ![Time_Small](https://github.com/user-attachments/assets/f8210b89-09b1-473a-af36-e99e1d003d18)
 
-Once the IF signal is available in this form, calculating the fast-Fourier transform (FFT) yields the range FFT. Normale, it is interesting to look at the amplitude vs. frequency plot of the FFT, which is shown in the next image.
+Once the IF signal is available in this form, calculating the fast-Fourier transform (FFT) yields the range FFT. Normally, it is interesting to look at the amplitude vs. frequency plot of the FFT, which is shown in the next image.
 
 ![Spectrum_IF](https://github.com/user-attachments/assets/64b7fbfe-ad3a-401d-ab40-3e90069d70e2)
 
