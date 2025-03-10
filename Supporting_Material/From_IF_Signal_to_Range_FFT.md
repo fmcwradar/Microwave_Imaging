@@ -7,3 +7,11 @@ The mixer on the transceiver PCB is the HMC8191 by Analog Devices, which is an I
 For signal processing, either the up or down ramp must be used. Additionally, it is possible to average the measurements of multiple ramps to reduce noise. The next image shows the IF signal of an up ramp. It can be seen that the amplitude at the beginning of the ramp is significantly higher than at the end. This is related to the hardware, which is described in detail in the related papers.
 
 ![Time_Small](https://github.com/user-attachments/assets/f8210b89-09b1-473a-af36-e99e1d003d18)
+
+Once the IF signal is available in this form, calculating the fast-Fourier transform (FFT) yields the range FFT. Normale, it is interesting to look at the amplitude vs. frequency plot of the FFT, which is shown in the next image.
+
+![Spectrum_IF](https://github.com/user-attachments/assets/64b7fbfe-ad3a-401d-ab40-3e90069d70e2)
+
+For an FMCW radar system this can be modified into the amplitude vs. distance plot.
+
+![Spectrum_Distance](https://github.com/user-attachments/assets/9cbb493d-d625-4737-9e74-fe2639990f3c)
