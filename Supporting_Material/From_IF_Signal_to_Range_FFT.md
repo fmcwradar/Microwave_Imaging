@@ -17,3 +17,5 @@ Once the IF signal is available in this form, calculating the fast-Fourier trans
 For an FMCW radar system this can be modified into the amplitude vs. distance plot.
 
 ![Spectrum_Distance](https://github.com/user-attachments/assets/9cbb493d-d625-4737-9e74-fe2639990f3c)
+
+The images show two measurements: one without a target, where the antennas are placed in front of an absorbing wall, and one with a large metal plate at a distance of approximately 60 cm in front of the antennas.
