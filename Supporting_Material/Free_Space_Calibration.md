@@ -8,9 +8,6 @@ In the image below, the uncalibrated and calibrated range FFT of a metal plate a
 
 The mentioned effects can also be found in the computed images. The next image shows the comparison between an uncalibrated and a calibrated radar image of a metal plate with dimensions of 10 cm x 10 cm. 
 
-![Metal_Plate](https://github.com/user-attachments/assets/510aa8a6-04f3-4fcf-a061-2883294d223d)
+![Metal_Plate](https://github.com/user-attachments/assets/44865998-5204-45b6-addd-b032bfa41376)
 
 It can be seen that the actual radar echo of the metal plate is narrower in the calibrated image and the apparent echoes behind the plate - due to spectral leakage - have been significantly reduced.
-
-
-
