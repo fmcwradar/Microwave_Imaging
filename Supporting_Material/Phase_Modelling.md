@@ -6,4 +6,4 @@ In the journal paper, the algorithm for calculating the radar images is describe
 
 A photograph of the two-target scenario can be seen in the next image.
 
-![Oszi_2Klotz_2b-07-03-25](https://github.com/user-attachments/assets/f5ee7b8f-0d9a-4b49-a3ea-de3195ae07a0)
+![Oszi_2Klotz_2b-07-03-25](https://github.com/user-attachments/assets/7e83cb1d-48b2-4602-bd52-f51f3a3c5ab5)
