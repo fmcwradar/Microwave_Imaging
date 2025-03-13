@@ -12,13 +12,13 @@ For the imaging with the vector network analyzer, the delay-and-sum (DAS) beamfo
 
 ## Imaging with VNA
 
-To compute an image based on a set of s-parameter measurements, it is necessary that you have a folder with the corresponding `.s2p` touchstone files. A separate touchstone file is required for every antenna position. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.s2p`, `0.0_10.0.s2p`, `0.0_20.0.s2p` and so on. To generate the image, it is necessary to run the script `Calculate_VNA_Image.py`. In the variable 'path' you just have to specfiy the folder with your touchstone files. After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. The final image is saved in this folders as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
+To compute an image based on a set of s-parameter measurements, it is necessary that you have a folder with the corresponding `.s2p` touchstone files. A separate touchstone file is required for every antenna position. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.s2p`, `0.0_10.0.s2p`, `0.0_20.0.s2p` and so on. To generate the image, it is necessary to run the script `Calculate_VNA_Image.py`. In the variable 'path' you just have to specfiy the folder with your touchstone files. After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. The final image is saved in this folder as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
 
 ## Imaging with FMCW Radar
 
 For the image generation with the FMCW radar system you have to run the file `Calculate_Radar_Image.py`. The input data for `Calculate_Radar_Image.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.csv`, `0.0_10.0.csv`, `0.0_20.0.csv` and so on.
 
-After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. The final image is saved in this folders as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
+After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. The final image is saved in this folder as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
 
 ## Animation of FMCW Radar Imaging
 
