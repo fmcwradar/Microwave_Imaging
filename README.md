@@ -24,6 +24,10 @@ After the calculation of the image is completed, a subfolder is created in the "
 
 There is also the possibility to generate fancy animations of the radar image like the one above. To do this, you must first execute `Calculate_Radar_Image_Animated.py` and then `Generate_GIF_File.py`.
 
+## Calibration
+
+The script `Calculate_Error_Function_Radar.py` is used to calculate the error-function for the FMCW radar system. For ideal data the calibration is useless, since there are no errors that need to be corrected.
+
 ## Getting started
 The repository contains two scripts (`Ideal_VNA_Data_Generator.py` and `Ideal_Radar_Data_Generator.py`) for the generation of ideal VNA and radar data. The ideal data is saved in the folders 'Ideal_Data_VNA' and 'Ideal_Data_Radar'. If these folders do not already exist they will be created automatically. The default settings are chosen so that you simply have to download the entire repository. Then you have to execute `Ideal_VNA_Data_Generator.py` and `Imaging_VNA.py` to get a VNA image. To generate a radar image the correct order is `Ideal_Radar_Data_Generator.py` and  `Calculate_Radar_Image.py`.
 
