@@ -2,7 +2,7 @@
 
 ![Animated_Measurement](https://github.com/user-attachments/assets/06c1093c-047b-41cf-987a-8fec5775e49a)
 
-In this repository you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency modulated continuous wave (FMCW) radar system.
+In this repository, you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency modulated continuous wave (FMCW) radar system.
 
 The FMCW radar system is realized with commercially available components. More details can be found in my publications (https://ieeexplore.ieee.org/document/10305102) and (https://ieeexplore.ieee.org/document/10590586).
 
