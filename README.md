@@ -16,7 +16,7 @@ To compute an image based on a set of s-parameter measurements, it is necessary 
 
 ## Imaging with FMCW Radar
 
-For the image generation with the FMCW radar system you have to run the file `Calculate_Radar_Image.py`. The input data for `Prepare_Radar_Data.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.csv`, `0.0_10.0.csv`, `0.0_20.0.csv` and so on.
+For the image generation with the FMCW radar system you have to run the file `Calculate_Radar_Image.py`. The input data for `Calculate_Radar_Image.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.csv`, `0.0_10.0.csv`, `0.0_20.0.csv` and so on.
 
 After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the data and time when the image was completed. The final image is saved in this folders as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
 
