@@ -7,6 +7,7 @@ from scipy import interpolate
 import pathlib
 from datetime import datetime
 from tqdm import tqdm
+import sys
 
 class radar_imaging:
 
@@ -62,7 +63,7 @@ class radar_imaging:
         self.image_matrix = np.zeros((self.number_of_points_y, self.number_of_points_x), dtype = complex)
         
         #Start Image Calculation
-        for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit="iteration"):
+        for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit=" files", file=sys.stdout):
 
             #Calculate Index Matrix
             x_axis = np.linspace(self.start_x, self.end_x, self.number_of_points_x)

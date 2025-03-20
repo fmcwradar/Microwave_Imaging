@@ -8,6 +8,8 @@ from tqdm import tqdm
 #Import of the Radar Measurement Evaluation Modul.
 from Radar_Evaluation_Modul import radar_measurement_evaluation
 from Radar_Imaging_Modul_V02 import radar_imaging
+import sys
+
 #Get current directory.
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
@@ -48,24 +50,29 @@ offset = 0
 list_of_measurements = []
 
 #Iterate over the measurements.
-for name in tqdm(file_names, desc="Preparing IF data", unit="iteration"):
+for name in tqdm(file_names, desc="Preparing IF data", unit="iteration", file=sys.stdout):
     single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,filtering,fc_low,fc_high,filterorder,offset,save_last_measurement,background_subtraction,hilbert)
     single_measurement.run_radar_evaluation()
     list_of_measurements.append(single_measurement)
 
+print(len(list_of_measurements))
 #Define settings for Radar_Imaging_Modul.
 distance = single_measurement.distance_corrected
 number_of_points_x = 401
 number_of_points_y = 401
+number_of_points_z = 1
 start_x = 0
 end_x = 50
 start_y = 40
 end_y = 90
+start_z = 0
+end_z = 0
+
 antenna_distance = 10
 antenna_start = 0
 antenna_end = 45
 dynamic_range = 40
-image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
+image_matrix = np.zeros((number_of_points_z, number_of_points_y, number_of_points_x), dtype = complex)
 #End of define settings.
 
 settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,number_of_points_x,number_of_points_y,path_csv]
