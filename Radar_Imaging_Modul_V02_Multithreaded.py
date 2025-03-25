@@ -35,8 +35,8 @@ class radar_imaging:
         number_of_measurements: (int) number of measurents that shall be evaluated for the image generation.
     """
 
-    def __init__(self,list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,number_of_points_z,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings):
-        self.list_of_measurements = list_of_measurements
+    def __init__(self,distance,offset,number_of_points_x,number_of_points_y,number_of_points_z,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,dynamic_range,settings):
+        # self.list_of_measurements = list_of_measurements
         self.distance = distance
         self.offset = offset
         self.number_of_points_x = number_of_points_x
@@ -49,22 +49,23 @@ class radar_imaging:
         self.end_y = end_y
         self.end_z = end_z
         self.antenna_distance = antenna_distance
-        self.antenna_start = antenna_start
-        self.antenna_end = antenna_end
         self.dynamic_range = dynamic_range
-        self.number_of_measurements = number_of_measurements
         self.settings = settings
 
-    def calculate_image(self, counter):
+        # self.antenna_start = antenna_start
+        # self.antenna_end = antenna_end
+        # self.number_of_measurements = number_of_measurements
+
+    def calculate_image(self, prepared_data_names):
     
         plt.rcParams.update(plt.rcParamsDefault)
         #Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
         distance = (self.distance-self.offset)*100
         distance *= 2
         
-        distance_increment = distance[10]-distance[9]
+        # distance_increment = distance[10]-distance[9]
 
-        antenna_positions = np.linspace(self.antenna_start, self.antenna_end, self.number_of_measurements)
+        # antenna_positions = np.linspace(self.antenna_start, self.antenna_end, self.number_of_measurements)
         # counter = 0
         
         self.image_matrix = np.zeros((self.number_of_points_x,self.number_of_points_y, self.number_of_points_z), dtype = complex)
@@ -76,23 +77,30 @@ class radar_imaging:
         y_axis = np.linspace(self.start_y, self.end_y, self.number_of_points_y)
         z_axis = np.linspace(self.start_z, self.end_z, self.number_of_points_z)
 
-        x_coordinates, y_coordinates, z_coordinates = np.meshgrid(x_axis, y_axis, z_axis)
+        x_coordinates, y_coordinates, z_coordinates = np.meshgrid(x_axis, y_axis, z_axis, indexing='ij')
+        print(np.shape(y_coordinates))
 
         # distance_a = np.sqrt(np.abs((x_coordinates-(antenna_x))**2 + y_coordinates**2+(self.antenna_distance/2)**2))    #Forward wave.
         # distance_b = np.sqrt(np.abs((x_coordinates-(antenna_x))**2 + y_coordinates**2-(self.antenna_distance/2)**2))    #Backward wave.
 
+        with open(f"{self.settings[26]}\Prepared_Data\\{prepared_data_names}.pkl", 'rb') as file:
+            # with open(f"{working_dir}\Final_3D_Files\\final_3D_image.pkl", 'rb') as file:
+            # Call load method to deserialze.
+            measurement = pickle.load(file)
+
         # name includes the whole file name without the file type, e.g. 0.0_10.0
         # split splits name at the '_'- symbol, e.g. 0.0 and 10.0
-        radar_position_z = float(str(self.list_of_measurements[counter].name).split('_')[0]) / 10  # convert mm to cm
-        radar_position_x = float(str(self.list_of_measurements[counter].name).split('_')[1]) / 10  # convert mm to cm
+        radar_position_z = float(str(prepared_data_names).split('_')[0]) / 10  # convert mm to cm
+        radar_position_x = float(str(prepared_data_names).split('_')[1]) / 10  # convert mm to cm
         # print(f"z_pos: {radar_position_z}, x_pos: {radar_position_x}")
 
         distance_a = np.sqrt((x_coordinates - radar_position_x) ** 2 + y_coordinates ** 2 + (z_coordinates - radar_position_z + self.antenna_distance / 2) ** 2)  # Forward wave.
         distance_b = np.sqrt((x_coordinates - radar_position_x) ** 2 + y_coordinates ** 2 + (z_coordinates - radar_position_z - self.antenna_distance / 2) ** 2)  # Backward wave.
+        print(f"shape of distance a: {np.shape(distance_a)}")
 
         distance_image = distance_a + distance_b
 
-        spectrum_single_measurement = self.list_of_measurements[counter].spectrum_up
+        spectrum_single_measurement = measurement   #.spectrum_up
 
         #Build Interpolator
         f_abs = interpolate.interp1d(distance, np.abs((spectrum_single_measurement)), kind = 'cubic')
@@ -102,7 +110,6 @@ class radar_imaging:
         image_matrix_cache_angle = f_angle(distance_image)
 
         image_matrix_cache = image_matrix_cache_abs * np.exp(1j*image_matrix_cache_angle)
-        # print(f"shape of image cache: {np.shape(image_matrix_cache)}")
 
         self.image_matrix = self.image_matrix + image_matrix_cache
 
@@ -148,44 +155,73 @@ class radar_imaging:
     # plt.show()
 
     def run_radar_imaging(self):
+        plotting = True
         image_matrix = np.zeros((self.number_of_points_x, self.number_of_points_y, self.number_of_points_z), dtype=complex)
         # walking through directory and collecting file names for multithreading in a later step
         from os import walk
-        file_names = next(walk(self.settings[27]), (None, None, []))[2]  # [] if no file
+        file_names = next(walk(self.settings[25]), (None, None, []))[2]  # [] if no file
 
         calculation_info = []
         for count, name in enumerate(file_names):
             if not name.startswith("distance"):
                 # combining all info needed for multithreading in an array called calculation_info
-                calculation_info.append((self.settings[27], self.distance, file_names[count], self.settings[21]))
+                calculation_info.append((self.settings[25], self.distance, file_names[count], self.settings[19]))
     
-        processor_number = 8
-        counter = np.linspace(0, len(file_names)-1, len(file_names), dtype=int)
+        processor_number = 6
+        # counter = np.linspace(0, len(file_names)-1, len(file_names), dtype=int)
+        prepared_data_names = [os.path.splitext(f)[0] for f in os.listdir(f"{self.settings[26]}\Prepared_Data") if f.endswith(".pkl")]
 
         with Pool(processor_number) as pool:
-            with tqdm(total=len(calculation_info), desc="Calculating Image", unit=" file", file=sys.stdout) as pbar:
+            with tqdm(total=len(calculation_info), desc="Calculating image", unit=" file", file=sys.stdout) as pbar:
                 # Use imap_unordered to process files and update progress bar
-                for result in pool.imap_unordered(self.calculate_image, counter):
+                for result in pool.imap_unordered(self.calculate_image, prepared_data_names):
                     # print(f"shape of result: {np.shape(result)}")
                     image_matrix += result
+                    # image_matrix = result
                     pbar.update(1)
+
+        path = self.settings[26]
+
+        with open(r"{0}\image_radar.pkl".format(path), 'wb') as file:
+            # A new file will be created.
+            pickle.dump(image_matrix, file)
 
         image_matrix = image_matrix ** 2
         image_matrix_norm = image_matrix / np.max(np.abs(image_matrix))
 
+        if plotting == True:
+            plt.figure("Multithreaded")
+            ax = sns.heatmap(10 * np.log10(np.abs(image_matrix_norm)[:,:,0]), cbar=True, cmap='jet', square=True, vmax=0,
+                             vmin=-self.dynamic_range, cbar_kws={'label': 'Normalized Intensity (dB)'})
+
+            x_axis = np.linspace(self.start_x, self.end_x, self.number_of_points_x)
+            y_axis = np.linspace(self.start_y, self.end_y, self.number_of_points_y)
+
+            x_ticks = (np.round(np.linspace(self.start_x, self.end_x,
+                                            int(np.round((np.abs(self.end_x) + np.abs(self.start_x)) / 5, 0) + 1)), 1))
+            x_ticks_location = np.linspace(0, len(x_axis),
+                                           int(np.round((np.abs(self.end_x) + np.abs(self.start_x)) / 5, 0) + 1))
+
+            y_ticks = (np.round(np.linspace(self.start_y, self.end_y,
+                                            int(np.round((np.abs(self.end_y) - np.abs(self.start_y)) / 5, 0) + 1)), 1))
+            y_ticks_location = np.linspace(0, len(y_axis),
+                                           int(np.round((np.abs(self.end_y) - np.abs(self.start_y)) / 5, 0) + 1))
+
+            ax.invert_yaxis()
+            cbar_axes = ax.figure.axes[-1]
+            ax.figure.axes[-1].yaxis.label.set_size(22.5)
+            plt.xticks(x_ticks_location, x_ticks, fontsize=22.5)
+            plt.yticks(y_ticks_location, y_ticks, fontsize=22.5)
+            plt.xlabel("x (cm)", fontsize=22.5)
+            plt.ylabel("y (cm)", fontsize=22.5)
+            cax = ax.figure.axes[-1]
+            cax.tick_params(labelsize=22.5)
+            plt.show()
+
         # Save the result in .pkl-file and create log-file.
-        current_dir = os.path.dirname(__file__)
-
-        date_today = datetime.today().strftime('%Y-%m-%d')
-
-        time_today = datetime.today().strftime('%H-%M-%S')
-
-        path = pathlib.Path(r'{0}\Pickle_Files\{1}_{2}'.format(current_dir, date_today, time_today))
-        path.mkdir(parents=True, exist_ok=True)
-
-        with open(r"{0}\image_radar.pkl".format(path), 'wb') as file:
-            # A new file will be created.
-            pickle.dump(image_matrix_norm, file)
+        # current_dir = os.path.dirname(__file__)
+        # date_today = datetime.today().strftime('%Y-%m-%d')
+        # time_today = datetime.today().strftime('%H-%M-%S')
 
         with open(r'{0}\Settings.txt'.format(path), 'a') as the_file:
             the_file.write('f_0 = {0} GHz\n'.format(self.settings[0] / 1e9))
@@ -210,9 +246,16 @@ class radar_imaging:
             the_file.write('end_y = {0} cm\n'.format(self.settings[19]))
             the_file.write('end_z = {0} cm\n'.format(self.settings[20]))
             the_file.write('antenna_distance = {0} cm\n'.format(self.settings[21]))
-            the_file.write('antenna_start = {0} cm\n'.format(self.settings[22]))
-            the_file.write('antenna_end = {0} cm\n'.format(self.settings[23]))
-            the_file.write('Number of points x = {0}\n'.format(self.settings[24]))
-            the_file.write('Number of points y = {0}\n'.format(self.settings[25]))
-            the_file.write('Number of points z = {0}\n'.format(self.settings[26]))
-            the_file.write('Filepath: {0}\n'.format(self.settings[27]))
+
+            # the_file.write('antenna_start = {0} cm\n'.format(self.settings[22]))
+            # the_file.write('antenna_end = {0} cm\n'.format(self.settings[23]))
+            # the_file.write('Number of points x = {0}\n'.format(self.settings[24]))
+            # the_file.write('Number of points y = {0}\n'.format(self.settings[25]))
+            # the_file.write('Number of points z = {0}\n'.format(self.settings[26]))
+            # the_file.write('Filepath: {0}\n'.format(self.settings[27]))
+            #
+            #
+            the_file.write('Number of points x = {0}\n'.format(self.settings[22]))
+            the_file.write('Number of points y = {0}\n'.format(self.settings[23]))
+            the_file.write('Number of points z = {0}\n'.format(self.settings[24]))
+            the_file.write('Filepath: {0}\n'.format(self.settings[25]))
