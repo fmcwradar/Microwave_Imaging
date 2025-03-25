@@ -73,6 +73,7 @@ antenna_start = 0
 antenna_end = 45
 dynamic_range = 40
 image_matrix = np.zeros((number_of_points_z, number_of_points_y, number_of_points_x), dtype = complex)
+image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
 #End of define settings.
 
 settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,number_of_points_x,number_of_points_y,path_csv]

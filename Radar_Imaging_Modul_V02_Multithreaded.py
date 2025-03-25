@@ -115,45 +115,6 @@ class radar_imaging:
 
         return self.image_matrix
 
-        # counter = counter + 1
-
-    def collect_and_calculate(self, calculation_info):
-        """
-        Function collect all data needed for the calculation of the image and calculates the image
-        """
-        global working_dir
-        path_pickle, distance, name, antenna_spacing = calculation_info
-        # with open(r'{0}\{1}'.format(path_pickle, name), 'rb') as file:
-        #     Call load method to deserialze.
-        #     spectrum = pickle.load(file)
-
-        # name = name[:-4]  # Delete the ".pkl" of the file name.
-
-        if not name.startswith("distance"):
-            image_matrix_cache = self.calculate_image()
-            print(type(image_matrix_cache))
-
-        return image_matrix_cache
-
-    # ax = sns.heatmap(10*np.log10(np.abs(image_matrix_norm)), cbar = True, cmap = 'jet',square = True, vmax = 0, vmin = -self.dynamic_range, cbar_kws={'label': 'Normalized Intensity (dB)'})
-    #
-    # x_ticks = (np.round(np.linspace(self.start_x, self.end_x, int(np.round((np.abs(self.end_x)+np.abs(self.start_x))/5,0)+1)),1))
-    # x_ticks_location = np.linspace(0, len(x_axis), int(np.round((np.abs(self.end_x)+np.abs(self.start_x))/5,0)+1))
-    #
-    # y_ticks = (np.round(np.linspace(self.start_y, self.end_y, int(np.round((np.abs(self.end_y)-np.abs(self.start_y))/5,0)+1)),1))
-    # y_ticks_location = np.linspace(0, len(y_axis), int(np.round((np.abs(self.end_y)-np.abs(self.start_y))/5,0)+1))
-    #
-    # ax.invert_yaxis()
-    # cbar_axes = ax.figure.axes[-1]
-    # ax.figure.axes[-1].yaxis.label.set_size(22.5)
-    # plt.xticks(x_ticks_location, x_ticks, fontsize = 22.5)
-    # plt.yticks(y_ticks_location, y_ticks, fontsize = 22.5)
-    # plt.xlabel("x (cm)", fontsize = 22.5)
-    # plt.ylabel("y (cm)", fontsize = 22.5)
-    # cax = ax.figure.axes[-1]
-    # cax.tick_params(labelsize=22.5)
-    # plt.show()
-
     def run_radar_imaging(self):
         plotting = True
         image_matrix = np.zeros((self.number_of_points_x, self.number_of_points_y, self.number_of_points_z), dtype=complex)
@@ -191,7 +152,7 @@ class radar_imaging:
 
         if plotting == True:
             plt.figure("Multithreaded")
-            ax = sns.heatmap(10 * np.log10(np.abs(image_matrix_norm)[:,:,0]), cbar=True, cmap='jet', square=True, vmax=0,
+            ax = sns.heatmap(10 * np.log10(np.abs(image_matrix_norm)[:,:,0].T), cbar=True, cmap='jet', square=True, vmax=0,
                              vmin=-self.dynamic_range, cbar_kws={'label': 'Normalized Intensity (dB)'})
 
             x_axis = np.linspace(self.start_x, self.end_x, self.number_of_points_x)

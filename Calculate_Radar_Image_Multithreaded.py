@@ -79,18 +79,18 @@ T_c = 200*1e-6
 c0 = sc.speed_of_light
 number_of_ramps = 50
 total = 8192
-windowing = False
-ideal = True
-swap_IQ = False
-calibration = False
-filtering = False
+windowing = True
+ideal = False
+swap_IQ = True
+calibration = True
+filtering = True
 fc_low = 350e3
 fc_high = 500e3
 filterorder = 10
 save_last_measurement = False
 background_subtraction = False
 hilbert = False
-offset = 0
+offset = 0.935
 #End of define settings.
 
 # list_of_measurements = []
@@ -103,51 +103,73 @@ offset = 0
 
 def main():
     global radar_imaging
-    # Pool(8) means 8 threads are used to process multiple files at the same time
-    with Pool(8) as pool:
-        # tqdm generates Progressbar with length=total
-        with tqdm(total=len(file_info), desc="Preparing files", unit=" file", file=sys.stdout) as pbar:
-            # Use imap_unordered to process files and update progress bar
-            for i, single_measurement in enumerate(pool.imap_unordered(process_data_in_file, file_info)):
-                list_of_measurements.append(single_measurement)
-                pbar.update(1)
 
     # Save the result in .pkl-file and create log-file.
     current_dir = os.path.dirname(__file__)
     from datetime import datetime
     date_today = datetime.today().strftime('%Y-%m-%d')
     time_today = datetime.today().strftime('%H-%M-%S')
-
     path = pathlib.Path(r'{0}\Pickle_Files\{1}_{2}'.format(current_dir, date_today, time_today))
     path.mkdir(parents=True, exist_ok=True)
+    prepared_data_path = pathlib.Path(f"{path}\Prepared_Data")
+    prepared_data_path.mkdir(parents=True, exist_ok=True)
 
-    with open(r"{0}\prepared_data.pkl".format(path), 'wb') as file:
-        # A new file will be created.
-        pickle.dump(list_of_measurements, file)
+    # Pool(8) means 8 threads are used to process multiple files at the same time
+    with Pool(8) as pool:
+        # tqdm generates Progressbar with length=total
+        with tqdm(total=len(file_info), desc="Preparing files", unit=" file", file=sys.stdout) as pbar:
+            # Use imap_unordered to process files and update progress bar
+            for single_measurement in pool.imap_unordered(process_data_in_file, file_info):
+                # list_of_measurements.append(single_measurement)
+                with open(f"{prepared_data_path}\{single_measurement.name}.pkl", 'wb') as file:
+                    # A new file will be created.
+                    pickle.dump(single_measurement.spectrum_up, file)
+                pbar.update(1)
+
+    # Save the result in .pkl-file and create log-file.
+    # current_dir = os.path.dirname(__file__)
+    # from datetime import datetime
+    # date_today = datetime.today().strftime('%Y-%m-%d')
+    # time_today = datetime.today().strftime('%H-%M-%S')
+    #
+    # path = pathlib.Path(r'{0}\Pickle_Files\{1}_{2}'.format(current_dir, date_today, time_today))
+    # path.mkdir(parents=True, exist_ok=True)
+    # prepared_data_path = pathlib.Path(f"{path}\Prepared_Data")
+    # prepared_data_path.mkdir(parents=True, exist_ok=True)
+    #
+    # for i in range(0, len(list_of_measurements)):
+    #     # Save the individual measurement objects for more efficient memory usage during image calculation
+    #     with open(f"{prepared_data_path}\{list_of_measurements[i].name}.pkl", 'wb') as file:
+    #         # A new file will be created.
+    #         pickle.dump(list_of_measurements[i], file)
 
     #Define settings for Radar_Imaging_Modul.
     distance = single_measurement.distance_corrected
     number_of_points_x = 201
     number_of_points_y = 201
-    number_of_points_z = 24
+    number_of_points_z = 201
     start_x = 0
     end_x = 45
     start_y = 40
-    end_y = 90
+    end_y = 80
     start_z = 0
     end_z = 23
 
     antenna_distance = 10
-    antenna_start = 0
-    antenna_end = 45
-    number_of_measurements = 46
-    dynamic_range = 40
+    # antenna_start = 0
+    # antenna_end = 45
+    # number_of_measurements = 46
+    dynamic_range = 30
     # image_matrix = np.zeros((number_of_points_z, number_of_points_y, number_of_points_x))
     #End of define settings.
 
-    settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,antenna_start,antenna_end,number_of_points_x,number_of_points_y,number_of_points_z,path_csv]
+    settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,number_of_points_x,number_of_points_y,number_of_points_z,path_csv, path]
 
-    radar_imaging = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,number_of_points_z,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings)
+    # radar_imaging = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,number_of_points_z,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings)
+    radar_imaging = radar_imaging(distance, offset, number_of_points_x, number_of_points_y,
+                                  number_of_points_z, start_x, start_y, start_z, end_x, end_y, end_z, antenna_distance,
+                                  dynamic_range, settings)
+
     radar_imaging.run_radar_imaging()
 
 if __name__ == "__main__":

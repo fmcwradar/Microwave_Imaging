@@ -25,18 +25,20 @@ elif pc_name == "MJ-XMG":
 
 current_dir = os.path.dirname(__file__)
 working_dir = r"D:\Microwave_Imaging\Pickle_Files\2025-03-20_11-37-56"
+save_animation = False
 
 with open(f"{working_dir}\\image_radar.pkl", 'rb') as file:
 # with open(f"{working_dir}\Final_3D_Files\\final_3D_image.pkl", 'rb') as file:
     # Call load method to deserialze.
     vol2 = pickle.load(file)
 
-    # intensity_matrix = vol2 ** 2
-    # intensity_matrix_norm = np.abs(intensity_matrix) / np.max(np.abs(intensity_matrix))
-    print(f"{np.max(np.abs(vol2))}")
-    intensity_matrix_db = 20 * np.log10(vol2)
+    intensity_matrix = vol2 ** 2
+    intensity_matrix_norm = np.abs(intensity_matrix) / np.max(np.abs(intensity_matrix))
+    # print(f"{np.max(np.abs(vol2))}")
+    intensity_matrix_db = 20 * np.log10(intensity_matrix_norm)
+    print(intensity_matrix_db.dtype)
 
-    image_matrix_3D = vol2[:, :, :].astype(np.float32)
+    image_matrix_3D = np.abs(vol2[:, :, :]).astype(np.float32)
     image_matrix_3D_db = intensity_matrix_db[:, :, :].astype(np.float32)
 
     vol2 = image_matrix_3D_db
@@ -44,26 +46,23 @@ with open(f"{working_dir}\\image_radar.pkl", 'rb') as file:
     rearranged_vol2 = np.swapaxes(vol2, 0, 2)
     rearranged_vol2 = np.flip(rearranged_vol2, 2)
     rearranged_vol2 = np.swapaxes(rearranged_vol2, 2, 1)
-    rearranged_vol2 = np.flip(rearranged_vol2, 1)
+    # rearranged_vol2 = np.flip(rearranged_vol2, 1)
     vol = rearranged_vol2
+    # vol = vol2
 
 with open(f"{working_dir}\\Settings.txt", "r") as file:
     lines = file.readlines()
 
-    offset = int(lines[14].split("= ")[1])
+    offset = float(lines[14].split("= ")[1])
     start_x = int(lines[15].split(" cm\n")[0].split("start_x = ")[1])
     start_y = int(lines[16].split(" cm\n")[0].split("start_y = ")[1])
     start_z = int(lines[17].split(" cm\n")[0].split("start_z = ")[1])
     end_x = int(lines[18].split(" cm\n")[0].split("end_x = ")[1])
     end_y = int(lines[19].split(" cm\n")[0].split("end_y = ")[1])
     end_z = int(lines[20].split(" cm\n")[0].split("end_z = ")[1])
-    number_of_points_x = int(lines[24].split("\n")[0].split("Number of points x = ")[1])
-    number_of_points_y = int(lines[25].split("\n")[0].split("Number of points y = ")[1])
-    number_of_points_z = int(lines[26].split("\n")[0].split("Number of points z = ")[1])
-
-print("start_x:", start_x)
-print("end_x:", end_x)
-print("number_of_points_x:", number_of_points_x)
+    number_of_points_x = int(lines[22].split("\n")[0].split("Number of points x = ")[1])
+    number_of_points_y = int(lines[23].split("\n")[0].split("Number of points y = ")[1])
+    number_of_points_z = int(lines[24].split("\n")[0].split("Number of points z = ")[1])
 
 x_axis = np.linspace(start_x, end_x, number_of_points_x)
 y_axis = np.linspace(start_y, end_y, number_of_points_y)
@@ -73,7 +72,7 @@ z_axis = np.linspace(start_z, end_z, number_of_points_z)
 canvas = scene.SceneCanvas(keys='interactive', size=(1000, 1000), show=True)
 view1 = canvas.central_widget.add_view()
 
-clim = (-40, 0)
+clim = (-30, 0)
 texture_format = 'auto'
 
 volume = scene.visuals.Volume(
@@ -290,33 +289,34 @@ canvas.events.resize.connect(on_canvas_resize)
 
 place_slice_plots("3D")
 
-import numpy as np
-import imageio
-from vispy import scene, app
+if save_animation == True:
+    import numpy as np
+    import imageio
+    from vispy import scene, app
 
-# Save video frames
-frames = []
-num_frames = 180  # Number of frames in the loop
+    # Save video frames
+    frames = []
+    num_frames = 180  # Number of frames in the loop
 
-for i in range(int(num_frames/2)):
-    view1.camera.azimuth += 180 / num_frames  # Rotate camera
-    canvas.update()  # Update canvas
-    frame = canvas.render()  # Capture frame
-    frames.append(frame)
+    for i in range(int(num_frames/2)):
+        view1.camera.azimuth += 180 / num_frames  # Rotate camera
+        canvas.update()  # Update canvas
+        frame = canvas.render()  # Capture frame
+        frames.append(frame)
 
-for i in range(int(num_frames/2)):
-    view1.camera.azimuth -= 180 / num_frames  # Rotate camera
-    canvas.update()  # Update canvas
-    frame = canvas.render()  # Capture frame
-    frames.append(frame)
+    for i in range(int(num_frames/2)):
+        view1.camera.azimuth -= 180 / num_frames  # Rotate camera
+        canvas.update()  # Update canvas
+        frame = canvas.render()  # Capture frame
+        frames.append(frame)
 
-# ✅ Save as MP4 using FFmpeg
-imageio.mimsave(f"Test.mp4", frames, format="FFMPEG", fps=30)
+    # ✅ Save as MP4 using FFmpeg
+    imageio.mimsave(f"Test.mp4", frames, format="FFMPEG", fps=30)
 
-# ✅ Save as GIF (Optional)
-imageio.mimsave(f"Test.gif", frames, duration=1/30)  # 30 FPS
+    # ✅ Save as GIF (Optional)
+    imageio.mimsave(f"Test.gif", frames, duration=1/30)  # 30 FPS
 
-print("MP4 and GIF saved successfully!")
+    print("MP4 and GIF saved successfully!")
 
 if __name__ == '__main__':
     canvas.show()
