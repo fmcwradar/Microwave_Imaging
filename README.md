@@ -10,6 +10,8 @@ As a VNA I used the E8361C from Keysight.
 
 For the imaging with the vector network analyzer, the delay-and-sum (DAS) beamforming algorithm is implemented. For the FMCW radar system the standard matched filter approach is used. However, both approaches are analytically identical.
 
+Much more details can be found in my journal paper, which is available as open access on IEEE Xplore (https://ieeexplore.ieee.org/document/10931040).
+
 ## Imaging with VNA
 
 To compute an image based on a set of s-parameter measurements, it is necessary that you have a folder with the corresponding `.s2p` touchstone files. A separate touchstone file is required for every antenna position. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.s2p`, `0.0_10.0.s2p`, `0.0_20.0.s2p` and so on. To generate the image, it is necessary to run the script `Calculate_VNA_Image.py`. In the variable 'path' you just have to specfiy the folder with your touchstone files. After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. The final image is saved in this folder as a pickle file. Additionally, there is a logfile in which all the used settings are stored.
