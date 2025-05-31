@@ -18,9 +18,6 @@ class display_3D:
         Class that calculates the image based on the IF spectra measured with an FMCW radar system.
 
         INPUTS:
-            list_of_measurements: (list) list of objects. Every object represents one FMCW radar measurement at a certain position.
-            distance: (numpy.ndarray) distance vector measured by the FMCW radar system.
-            offset: (float) offset value that needs to be subtracted from the distance vector.
             number_of_points_x: (int) number of points along the x_axis.
             number_of_points_y: (int) number of points along the y_axis.
             number_of_points_z: (int) number of points along the z_axis.
@@ -30,11 +27,8 @@ class display_3D:
             end_x: (float) end value of the x-axis in the image.
             end_y: (float) end value of the y_axis in the image.
             end_z: (float) end value of the z_axis in the image.
-            antenna_distance: (float) distance between the antenna centers.
-            antenna_start: (float) start position of the antennas along the linear axis.
-            antenna_end: (float) end position of the antennas along the linear axis.
             dynamic_range: (float) dynamic range of the image.
-            number_of_measurements: (int) number of measurents that shall be evaluated for the image generation.
+            path: (string) path description to the working directory.
         """
 
     def __init__(self, number_of_points_x, number_of_points_y, number_of_points_z, start_x, start_y,
@@ -52,16 +46,6 @@ class display_3D:
         self.dynamic_range = dynamic_range
         self.path = path
 
-    # current_dir = os.path.dirname(__file__)
-    # project_name = r"2025-03-25_15-23-57_3D-mit-langen-Bohrungen"
-    # working_dir = f"D:\Microwave_Imaging\Pickle_Files\{project_name}"
-
-
-
-    # data_points_x = np.size(vol, 0)
-    # data_points_y = np.size(vol, 1)
-    # data_points_z = np.size(vol, 2)
-
     def add_axis(view, axis, start, end, ticks, label_pos, line_width=1000):
         for t in ticks:
             if axis == 'x':
@@ -72,11 +56,9 @@ class display_3D:
                 tick_color = 'blue'
             tick_line = scene.visuals.Line(pos=np.array([start, start + (t - np.min(ticks)) * (end - start)]), color=tick_color, width=10, parent=view.scene)
             tick_line.transform = MatrixTransform()
-            # tick_line.transform.translate(start + t * (end - start) + label_pos)
             tick_line.transform.translate(label_pos)
             tick_label = scene.visuals.Text(str(round(t, 0)), color='white', font_size=5000, anchor_x='right', anchor_y='bottom', parent=view.scene)
             tick_label.transform = MatrixTransform()
-            # tick_label.transform.translate(start + t * (end - start) + label_pos)
             tick_label.transform.translate((t- np.min(ticks)) * (end - start) + label_pos)
 
     def update_coordinate_system(self):
@@ -88,12 +70,11 @@ class display_3D:
         y_ticks_location = np.linspace(0, len(self.y_axis), int(np.round((np.abs(self.end_y) - np.abs(self.start_y)) / 4, 0) + 1))
 
         z_ticks = (np.linspace(self.start_z, self.end_z, 5))
-        # z_ticks = [0.0, 3.0, 7.0, 11.0, 15.0, 19.0, 23.0]
         z_ticks_location = np.linspace(0, len(self.z_axis), int(np.round(((self.end_z) - (self.start_z)) / 4, 0) + 1))
 
-        print(x_ticks)
-        print(y_ticks)
-        print(z_ticks)
+        # print(x_ticks)
+        # print(y_ticks)
+        # print(z_ticks)
 
         # Add the X axis
         self.add_axis(view1, 'x', np.array([0, 0, 0]), np.array([4.5, 0, 0]), x_ticks, np.array([0, -16, 0]))
@@ -199,7 +180,7 @@ class display_3D:
             self.place_slice_plots("3D")
 
     # Define the resize callback
-    def update_colorbars(colorbars):
+    def update_colorbars(self):
         # Get the new canvas size
         canvas_size = canvas.size
         colorbar_width = 400
@@ -226,15 +207,12 @@ class display_3D:
 
         intensity_matrix = vol2 ** 2
         intensity_matrix_norm = np.abs(intensity_matrix) / np.max(np.abs(intensity_matrix))
-        # print(f"{np.max(np.abs(vol2))}")
         intensity_matrix_db = 20 * np.log10(intensity_matrix_norm)
-        # print(intensity_matrix_db.dtype)
 
         image_matrix_3D = np.abs(vol2[:, :, :]).astype(np.float32)
         image_matrix_3D_db = intensity_matrix_db[:, :, :].astype(np.float32)
 
         vol2 = image_matrix_3D_db
-        # print(f"{np.max(np.abs(vol2))}")
         rearranged_vol2 = np.swapaxes(vol2, 0, 2)
         rearranged_vol2 = np.flip(rearranged_vol2, 2)
         rearranged_vol2 = np.swapaxes(rearranged_vol2, 2, 1)
@@ -250,7 +228,6 @@ class display_3D:
         canvas = scene.SceneCanvas(keys='interactive', size=(1000, 1000), show=True)
         view1 = canvas.central_widget.add_view()
 
-
         texture_format = 'auto'
 
         self.plane_start = (np.shape(self.vol)[0] - 1, np.shape(self.vol)[1] - 1, np.shape(self.vol)[2] - 1)
@@ -260,8 +237,6 @@ class display_3D:
             parent=view1.scene,
             raycasting_mode='volume',
             method='mip',
-            # cmap='jet',
-            # clim=clim
         )
         volume.set_gl_state('additive')
         volume.opacity = 0.25
@@ -271,8 +246,6 @@ class display_3D:
             parent=view1.scene, fov=60.0, azimuth=-42.0, elevation=30.0
         )
         view1.camera = self.cam
-
-        # update_axis_visual()
         self.update_coordinate_system()
 
         # Implement key presses
@@ -327,34 +300,24 @@ class display_3D:
                 print(f"plane position: {plane.plane_position}")
             elif event.text == 'x':
                 plane.plane_normal = [0, 0, 1]
-                current_plane = 0
             elif event.text == 'y':
                 plane.plane_normal = [0, 1, 0]
-                current_plane = 1
             elif event.text == 'z':
                 plane.plane_normal = [1, 0, 0]
-                current_plane = 2
             elif event.text == 'o':
                 plane.plane_normal = [1, 1, 1]
-                current_plane = 'o'
             elif event.text == ' ':
                 if self.timer.running:
                     self.timer.stop()
                     self.replace_plot("None")
-
-                    # update_coordinate_system()
-
                     print(f"plane position: {plane.plane_position}")
                 else:
                     self.timer.start()
 
         timer = app.Timer('auto', connect=self.move_plane, start=True)
-
         shape = self.vol.shape
         colorbars = []
-
         canvas.events.resize.connect(self.on_canvas_resize)
-
         self.place_slice_plots("3D")
 
         if save_animation == True:
@@ -378,10 +341,10 @@ class display_3D:
                 frame = canvas.render()  # Capture frame
                 frames.append(frame)
 
-            # ✅ Save as MP4 using FFmpeg
+            # Save as MP4 using FFmpeg
             imageio.mimsave(f"Test.mp4", frames, format="FFMPEG", fps=30)
 
-            # ✅ Save as GIF (Optional)
+            # Save as GIF (Optional)
             imageio.mimsave(f"Test.gif", frames, duration=1 / 30)  # 30 FPS
 
             print("MP4 and GIF saved successfully!")
@@ -390,5 +353,4 @@ class display_3D:
             canvas.show()
             print(__doc__)
             if sys.flags.interactive == 0:
-                # plane.plane_position = plane_start
                 app.run()

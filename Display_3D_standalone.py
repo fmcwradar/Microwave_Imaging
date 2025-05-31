@@ -6,10 +6,13 @@ from vispy.scene.visuals import Text
 import scipy
 import os
 import pickle
+import pathlib
+from tqdm import tqdm
 
 current_dir = os.path.dirname(__file__)
-project_name = r"2025-04-28_11-37-11"
+project_name = r"2025-05-20_14-49-41"
 working_dir = f"D:\Microwave_Imaging\Pickle_Files\{project_name}"
+working_dir = f"C:\\Users\mjsch\Desktop\Microwave_Imaging-new\Pickle_Files\{project_name}"
 save_animation = False
 
 with open(f"{working_dir}\\image_radar.pkl", 'rb') as file:
@@ -29,8 +32,8 @@ with open(f"{working_dir}\\image_radar.pkl", 'rb') as file:
     vol2 = image_matrix_3D_db
     print(f"{np.max(np.abs(vol2))}")
     rearranged_vol2 = np.swapaxes(vol2, 0, 2)
-    rearranged_vol2 = np.flip(rearranged_vol2, 2)
-    rearranged_vol2 = np.swapaxes(rearranged_vol2, 2, 1)
+    # rearranged_vol2 = np.flip(rearranged_vol2, 2)
+    # rearranged_vol2 = np.swapaxes(rearranged_vol2, 2, 1)
     # rearranged_vol2 = np.flip(rearranged_vol2, 1)
     vol = rearranged_vol2
     # vol = vol2
@@ -57,7 +60,7 @@ z_axis = np.linspace(start_z, end_z, number_of_points_z)
 canvas = scene.SceneCanvas(keys='interactive', size=(1000, 1000), show=True)
 view1 = canvas.central_widget.add_view()
 
-clim = (-30, 0)
+clim = (-40, 0)
 texture_format = 'auto'
 
 plane_start = (np.shape(vol)[0] - 1, np.shape(vol)[1] - 1, np.shape(vol)[2] - 1)
@@ -154,11 +157,12 @@ def on_key_press(event):
         print("Saving view")
         import matplotlib.pyplot as plt
         # Render the canvas to an image
-        img = canvas.render(size=(20, 20))
+        img = canvas.render(size=(1000, 1000))
         # Save the image as a PDF
         plt.imshow(img)
         plt.axis('off')  # Remove axes for a clean output
         plt.savefig("3D-output.pdf", bbox_inches='tight', pad_inches=0)
+        plt.savefig("3D-output.jpeg", bbox_inches='tight', pad_inches=0)
         plt.close()
     if event.text == '1':
         methods = ['mip', 'average']
@@ -349,20 +353,15 @@ def place_slice_plots(select_slice):
 def update_colorbars(colorbars):
     # Get the new canvas size
     canvas_size = canvas.size
-    colorbar_width = 400
-    colorbar_height = 30  # Scale height to 80% of canvas height
-
     colorbar_0.transform = scene.STTransform(translate=(canvas_size[0] * 0.9, canvas_size[1] * 0.45, 0))
 
 # Function to resize plot elements based on canvas size
 def on_canvas_resize(event):
     global slice_z, slice_y, slice_x, title_z, title_y, title_x, title_3D
     canvas_width, canvas_height = event.size
-    canvas_size = [canvas_width, canvas_height]
     update_colorbars(colorbars)
 
 canvas.events.resize.connect(on_canvas_resize)
-
 place_slice_plots("3D")
 
 if save_animation == True:
@@ -386,10 +385,10 @@ if save_animation == True:
         frame = canvas.render()  # Capture frame
         frames.append(frame)
 
-    # ✅ Save as MP4 using FFmpeg
+    # Save as MP4 using FFmpeg
     imageio.mimsave(f"Test.mp4", frames, format="FFMPEG", fps=30)
 
-    # ✅ Save as GIF (Optional)
+    # Save as GIF (Optional)
     imageio.mimsave(f"Test.gif", frames, duration=1/30)  # 30 FPS
 
     print("MP4 and GIF saved successfully!")
@@ -398,5 +397,4 @@ if __name__ == '__main__':
     canvas.show()
     print(__doc__)
     if sys.flags.interactive == 0:
-        # plane.plane_position = plane_start
         app.run()
