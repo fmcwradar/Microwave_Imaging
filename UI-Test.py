@@ -9,6 +9,8 @@ import sys
 import re
 from tkinter import filedialog
 from tkinter import  StringVar
+from tkinter import ttk
+import serial.tools.list_ports
 
 from Automatisation_Modul import automatisation
 
@@ -74,7 +76,46 @@ absolut = 0
 feed_rate_x = 200
 feed_rate_z = 175
 
+path = current_dir
+with open(r'{0}\ui-settings.txt'.format(path), 'r') as f:
+    for line in f:
+        parts = line.strip().split(',')
+        if len(parts) >= 2:
+            key = parts[0].strip()
+            value = parts[1].strip()
+
+            # Zuweisung basierend auf dem Namen
+            if key == 'start_x':
+                start_x = int(value)
+            elif key == 'end_x':
+                end_x = int(value)
+            elif key == 'start_z':
+                start_z = int(value)
+            elif key == 'end_z':
+                end_z = int(value)
+            elif key == 'step_size':
+                step_size = int(value)
+            elif key == 'feed_rate_x':
+                feed_rate_x = int(value)
+            elif key == 'feed_rate_z':
+                feed_rate_z = int(value)
+            elif key == 'IP':
+                IP = value
+            elif key == 'Storage':
+                Storage = value
+
 ser = None
+
+def get_com_ports():
+    ports = serial.tools.list_ports.comports()
+    return [port.device for port in ports]
+
+def on_com_select(event):
+    selected_port = combobox.get()
+    print(f"Ausgewählter COM-Port: {selected_port}")
+
+# COM-Ports abrufen
+com_ports = get_com_ports()
 
 # Send GRBL commands
 def send_gcode(gcode):
@@ -88,6 +129,9 @@ def send_gcode(gcode):
 def unlock_grbl():
     send_gcode("$X")  # Unlock GRBL
 
+def hold_motion():
+    send_gcode("!") #feed hold
+
 # Wait for GRBL to become idle
 def wait_until_idle():
     while True:
@@ -98,13 +142,13 @@ def wait_until_idle():
         time.sleep(0.5)
 
 # === GRBL Verbindung ===
-def connecting():
+def connecting(port):
     global  ser
     if ser is None:
         # Verbinden
         try:
             print("Connecting...")
-            ser = serial.Serial('COM3', 115200, timeout=1)
+            ser = serial.Serial(port, 115200, timeout=1)
             time.sleep(2)
             ser.flushInput()
             btn_connecting.config(text="Trennen", bg="red")
@@ -131,7 +175,7 @@ def move_to(absolut, feed_rate, x_pos, z_pos):
     except ValueError:
         print("Not valid value!")
     # print(step_size)
-
+    send_gcode("~")
     if x_pos == 1:
         try:
             feed_rate = int(entry_feedrate_x.get())
@@ -153,7 +197,7 @@ def move_to(absolut, feed_rate, x_pos, z_pos):
         x_pos = x_pos * step_size
         z_pos = z_pos * step_size
         send_gcode(f"G{set_ref} G1 X{x_pos} Y{z_pos} F{feed_rate}")
-        wait_until_idle()
+        # wait_until_idle()
     except Exception as e:
         if str(e) == "'NoneType' object has no attribute 'write'":
             print(f"Not connected.")
@@ -190,6 +234,9 @@ def starte_script():
     print("Running test automatisation.")
     # automate.run_automatisation()
 
+def starte_pll():
+    print("PLL is starting")
+
 # === Nur Integer erlauben ===
 def validate_int(text):
     return text == "" or text.isdigit()
@@ -221,7 +268,7 @@ def on_entry_click(event):
 
 def on_focusout(event):
     if entry_IP.get() == "":
-        entry_IP.insert(0, default_IP)
+        entry_IP.insert(0, IP)
         entry_IP.config(fg='grey')
 
 def ordner_waehlen():
@@ -250,10 +297,38 @@ def update_measurements(*args):
         label_x_var.set("Measurements in X: Fehler")
         label_z_var.set("Measurements in Z: Fehler")
 
+def on_close():
+    print("Fenster wird geschlossen. Speichere Daten oder räume auf...")
+    start_x = int(entry_start_x.get())
+    end_x = int(entry_end_x.get())
+    start_z = int(entry_start_z.get())
+    end_z = int(entry_end_z.get())
+    step_size = int(entry_step_size.get())
+    feed_rate_x = int(entry_feedrate_x.get())
+    feed_rate_z = int(entry_feedrate_z.get())
+    IP = entry_IP.get()
+
+    with open(r'{0}\ui-settings.txt'.format(path), 'w') as the_file:
+        the_file.write('start_x, {0},\n'.format(start_x))
+        the_file.write('end_x, {0},\n'.format(end_x))
+        the_file.write('start_z, {0},\n'.format(start_z))
+        the_file.write('end_z, {0},\n'.format(end_z))
+        the_file.write('step_size, {0},\n'.format(step_size))
+        the_file.write('feed_rate_x, {0},\n'.format(feed_rate_x))
+        the_file.write('feed_rate_z, {0},\n'.format(feed_rate_z))
+        the_file.write('IP, {0},\n'.format(IP))
+        the_file.write('Storage, {0},\n'.format(storage))
+
+    # Aufräumen
+    if ser:
+        ser.close()
+
+    root.destroy()  # Fenster schließen
+
 # === GUI ===
 root = tk.Tk()
 root.title("Mini G-Code Sender")
-root.geometry("600x400")  # Breiter wegen neuem Bereich
+root.geometry("650x450")  # Breiter wegen neuem Bereich
 
 vcmd = (root.register(validate_int), '%P')  # Validator für Eingabefelder
 vIP = (root.register(validate_ip), '%P')  # Validator für IP-Adressen)
@@ -268,16 +343,44 @@ left_frame.grid(row=0, column=0, padx=(0, 20))
 
 step = 1.0
 
+# COM Port
+# Dropdown-Menü (Combobox)
+combobox = ttk.Combobox(left_frame, values=com_ports, state="readonly", width=10)
+combobox.grid(row=1, column=0, pady=(0, 0))
+# combobox.pack(pady=5)
+combobox.bind("<<ComboboxSelected>>", on_com_select)
+
+# Optional: Standardauswahl
+if com_ports:
+    combobox.current(0)
+
+# entry_com = tk.Entry(left_frame, validate="key", validatecommand=vcmd, justify="left")
+# entry_com.grid(row=1, column=0, pady=(0, 0))
+# entry_com.insert(0, 'COM3')
+
 # Verbindung starten/ stoppen
-btn_connecting = tk.Button(left_frame, text="Verbinden", command=lambda: connecting(), width=10, height=2)
+port = str(combobox.get())
+if port == '':
+    port = "COM3"
+btn_connecting = tk.Button(left_frame, text="Verbinden", command=lambda: connecting(port), width=10, height=2)
 btn_connecting.config(text="Verbinden", bg="green")
 btn_connecting.grid(row=0, column=0)
+
+# Stop Bewegung
+btn_stop = tk.Button(left_frame, text="Stop", command=lambda: hold_motion(), width=10, height=2)
+btn_stop.config(text="Stop")
+btn_stop.grid(row=0, column=1)
+
+# Unlock
+btn_unlock = tk.Button(left_frame, text="Unlock", command=lambda: unlock_grbl(), width=10, height=2)
+btn_unlock.config(text="Unlock")
+btn_unlock.grid(row=0, column=2)
 
 # Schrittgröße
 tk.Label(left_frame, text="Step size:").grid(row=4, column=0, sticky="w", pady=(0, 0))
 entry_step_size = tk.Entry(left_frame, validate="key", validatecommand=vcmd, justify="center")
 entry_step_size.grid(row=4, column=1, pady=(0, 0))
-entry_step_size.insert(0, "1")
+entry_step_size.insert(0, str(step_size))
 
 # Feedrate für X und Z Achse
 tk.Label(left_frame, text="Feedrate X:").grid(row=5, column=0, sticky="w")
@@ -338,12 +441,16 @@ tk.Label(right_frame, text="End Z:").grid(row=8, column=0, sticky="w")
 entry_end_z = tk.Entry(right_frame, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_z)
 entry_end_z.grid(row=8, column=1)
 
-btn_script = tk.Button(right_frame, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2)
-btn_script.grid(row=3, column=0, columnspan=2, pady=(10, 10))
+btn_script = tk.Button(right_frame, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
+btn_script.grid(row=3, column=0, columnspan=1, pady=(10, 10))
+
+btn_PLL = tk.Button(right_frame, text="PLL starten", command=starte_pll, bg="green", fg="white", height=2)
+btn_PLL.grid(row=3, column=1, columnspan=1, pady=(10, 10))
 
 tk.Label(right_frame, text="IP-Address of Oszi:").grid(row=0, column=0, sticky="w")
 entry_IP = tk.Entry(right_frame, fg='grey', validate="key", validatecommand=vIP, justify="right")
 entry_IP.grid(row=0, column=1)
+entry_IP.tooltip = ToolTip(entry_IP, f"Default IP: {default_IP}")
 
 button_storage = tk.Button(right_frame, text="Speicherordner wählen", command=ordner_waehlen)
 button_storage.grid(row=1, column=0, columnspan=2, pady=(10, 10))
@@ -353,19 +460,19 @@ label.grid(row=2, column=0, columnspan=2)
 # Tooltip initialisieren
 label.tooltip = ToolTip(label, "Default folder")
 
-entry_start_x.insert(0, "0")
-entry_end_x.insert(0, "100")
-entry_start_z.insert(0, "0")
-entry_end_z.insert(0, "50")
+entry_start_x.insert(0, str(start_x))
+entry_end_x.insert(0, str(end_x))
+entry_start_z.insert(0, str(start_z))
+entry_end_z.insert(0, str(end_z))
 
 label_steps_x = tk.Label(right_frame, text=f"Measurements in X: {steps_x}", fg="grey", textvariable=label_x_var)
 label_steps_x.grid(row=6, column=0)
 label_steps_y = tk.Label(right_frame, text=f"Measurements in Z: {steps_y}", fg="grey", textvariable=label_z_var)
 label_steps_y.grid(row=9, column=0)
 
-entry_feedrate_x.insert(0, "200")
-entry_feedrate_z.insert(0, "175")
-entry_IP.insert(0, default_IP)
+entry_feedrate_x.insert(0, str(feed_rate_x))
+entry_feedrate_z.insert(0, str(feed_rate_z))
+entry_IP.insert(0, IP)
 
 entry_IP.bind('<FocusIn>', on_entry_click)
 entry_IP.bind('<FocusOut>', on_focusout)
@@ -382,8 +489,12 @@ console.pack(fill="both", expand=False, padx=10, pady=5)
 sys.stdout = Redirector(console)
 sys.stderr = Redirector(console)
 
+
+# Event-Handler registrieren
+root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
 
 # Aufräumen
 if ser:
     ser.close()
+

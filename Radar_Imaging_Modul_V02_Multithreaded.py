@@ -170,7 +170,7 @@ class radar_imaging:
 
             plt.show()
 
-        if save_cuts == True:
+        if len(z_axis) != 1 and save_cuts == True:
             size_setting = 10
 
             output_path = pathlib.Path(f'{path}\Cuts')
