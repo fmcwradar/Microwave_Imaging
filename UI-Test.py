@@ -11,6 +11,11 @@ from tkinter import filedialog
 from tkinter import  StringVar
 from tkinter import ttk
 import serial.tools.list_ports
+import subprocess
+import time
+
+import sys
+sys.stdout.reconfigure(line_buffering=True)
 
 from Automatisation_Modul import automatisation
 
@@ -58,7 +63,7 @@ current_dir = os.path.dirname(__file__)
 step_size = 1
 start_x = 0
 start_z = 0
-end_x = 0
+end_x = 600
 end_z = 0
 
 steps_x = 0
@@ -76,33 +81,49 @@ absolut = 0
 feed_rate_x = 200
 feed_rate_z = 175
 
-path = current_dir
-with open(r'{0}\ui-settings.txt'.format(path), 'r') as f:
-    for line in f:
-        parts = line.strip().split(',')
-        if len(parts) >= 2:
-            key = parts[0].strip()
-            value = parts[1].strip()
+methode_choice = "Einzelmessung"
 
-            # Zuweisung basierend auf dem Namen
-            if key == 'start_x':
-                start_x = int(value)
-            elif key == 'end_x':
-                end_x = int(value)
-            elif key == 'start_z':
-                start_z = int(value)
-            elif key == 'end_z':
-                end_z = int(value)
-            elif key == 'step_size':
-                step_size = int(value)
-            elif key == 'feed_rate_x':
-                feed_rate_x = int(value)
-            elif key == 'feed_rate_z':
-                feed_rate_z = int(value)
-            elif key == 'IP':
-                IP = value
-            elif key == 'Storage':
-                Storage = value
+path = current_dir
+
+if os.path.exists(r'{0}\ui-settings.txt'.format(path)):
+    with open(r'{0}\ui-settings.txt'.format(path), 'r') as f:
+        for line in f:
+            parts = line.strip().split(',')
+            if len(parts) >= 2:
+                key = parts[0].strip()
+                value = parts[1].strip()
+
+                # Zuweisung basierend auf dem Namen
+                if key == 'start_x':
+                    start_x = int(value)
+                elif key == 'end_x':
+                    end_x = int(value)
+                elif key == 'start_z':
+                    start_z = int(value)
+                elif key == 'end_z':
+                    end_z = int(value)
+                elif key == 'step_size':
+                    step_size = int(value)
+                elif key == 'feed_rate_x':
+                    feed_rate_x = int(value)
+                elif key == 'feed_rate_z':
+                    feed_rate_z = int(value)
+                elif key == 'IP':
+                    IP = value
+                elif key == 'Storage':
+                    Storage = value
+else:
+    print("Datei nicht gefunden.")
+    with open(r'{0}\ui-settings.txt'.format(path), 'w') as the_file:
+        the_file.write('start_x, {0},\n'.format(start_x))
+        the_file.write('end_x, {0},\n'.format(end_x))
+        the_file.write('start_z, {0},\n'.format(start_z))
+        the_file.write('end_z, {0},\n'.format(end_z))
+        the_file.write('step_size, {0},\n'.format(step_size))
+        the_file.write('feed_rate_x, {0},\n'.format(feed_rate_x))
+        the_file.write('feed_rate_z, {0},\n'.format(feed_rate_z))
+        the_file.write('IP, {0},\n'.format(default_IP))
+        the_file.write('Storage, {0},\n'.format(storage))
 
 ser = None
 
@@ -110,7 +131,16 @@ def get_com_ports():
     ports = serial.tools.list_ports.comports()
     return [port.device for port in ports]
 
+def update_com_ports():
+    ports = get_com_ports()
+    combobox['values'] = ports
+    if ports:
+        combobox.current(0)
+    else:
+        combobox.set('--')
+
 def on_com_select(event):
+    com_ports = get_com_ports()
     selected_port = combobox.get()
     print(f"Ausgewählter COM-Port: {selected_port}")
 
@@ -209,22 +239,32 @@ def starte_script():
     global start_x, start_z, end_x, end_z
     # Messfenster bestimmen
     try:
-        start_x = int(entry_start_x.get())
+        # if methode_choice == "Ebenenmessung":
+        #     start_x = int(entry_start_x_plane.get())
+        # if methode_choice == "3D-Messung":
+        #     start_x = int(entry_start_x_3D.get())
+        start_x = Var_start_x
     except ValueError:
         print("Not valid value!")
         start_x = 0  # oder eine Fehlermeldung anzeigen
     try:
-        end_x = int(entry_end_x.get())
+        # if methode_choice == "Ebenenmessung":
+        #     end_x = int(entry_end_x_plane.get())
+        # if methode_choice == "3D-Messung":
+        #     end_x = int(entry_end_x_3D.get())
+        end_x =  Var_end_x
     except ValueError:
         print("Not valid value!")
         end_x = 0  # oder eine Fehlermeldung anzeigen
     try:
-        start_z = int(entry_start_z.get())
+        # start_z = int(entry_start_z_3D.get())
+        start_z = Var_start_z
     except ValueError:
         print("Not valid value!")
         start_z = 0  # oder eine Fehlermeldung anzeigen
     try:
-        end_z = int(entry_end_z.get())
+        # end_z = int(entry_end_z_3D.get())
+        end_z = Var_end_z
     except ValueError:
         print("Not valid value!")
         end_z = 0  # oder eine Fehlermeldung anzeigen
@@ -235,8 +275,36 @@ def starte_script():
     # automate.run_automatisation()
 
 def starte_pll():
+    prozess = subprocess.Popen(
+        ["python", "ControllPLL/PLLconfigurator_V1.py"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
+        text=True
+    )
+
+    for line in prozess.stdout:
+        print(">>", line.strip())
+    #     read_done = False
+    #     if "r -> read file. Else: -> quit program. Type in: " in line and read_done == False:
+    #         print("-> Eingabe erkannt. Sende 'r'")
+    #         prozess.stdin.write("r\n")
+    #         prozess.stdin.flush()
+    #
+    #     # read_done = True
+    #     # if "r -> read file. Else: -> quit program. Type in: " in line and read_done == True:
+    #     #     print("-> Eingabe erkannt. Sende 'k'")
+    #     #     prozess.stdin.write("k\n")
+    #     #     prozess.stdin.flush()
+    #
     print("PLL is starting")
 
+def starte_psu():
+    print("Powersupplies are starting.")
+
+def osz_test():
+    # Hier das osz-test Skript adaptiert ausführen
+    print("Single measurement is done.")
 # === Nur Integer erlauben ===
 def validate_int(text):
     return text == "" or text.isdigit()
@@ -299,10 +367,16 @@ def update_measurements(*args):
 
 def on_close():
     print("Fenster wird geschlossen. Speichere Daten oder räume auf...")
-    start_x = int(entry_start_x.get())
-    end_x = int(entry_end_x.get())
-    start_z = int(entry_start_z.get())
-    end_z = int(entry_end_z.get())
+    global start_x, end_x
+
+    if methode_choice == "Ebenenmessung":
+        start_x = int(entry_start_x_plane.get())
+        end_x = int(entry_end_x_plane.get())
+    if methode_choice == "3D-Messung":
+        start_x = int(entry_start_x_3D.get())
+        end_x = int(entry_end_x_3D.get())
+    start_z = int(entry_start_z_3D.get())
+    end_z = int(entry_end_z_3D.get())
     step_size = int(entry_step_size.get())
     feed_rate_x = int(entry_feedrate_x.get())
     feed_rate_z = int(entry_feedrate_z.get())
@@ -325,10 +399,32 @@ def on_close():
 
     root.destroy()  # Fenster schließen
 
+def show_layout(method_choice):
+    # Alle Layout-Frames verstecken
+    for frame in layouts.values():
+        frame.grid_forget()
+
+    # Passenden Frame anzeigen
+    if method_choice in layouts:
+        layouts[method_choice].grid(pady=10)
+
+def on_dropdown_change(event):
+    method_choice = Messungsmethoden_dropdown.get()
+    show_layout(method_choice)
+
+    # if methode_choice == "Ebenenmessung":
+    #     entry_start_x_plane.insert(0, str(Var_start_x))
+    #     entry_end_x_plane.insert(0, str(Var_end_x))
+    # if methode_choice == "3D-Messung":
+    #     entry_start_x_3D.insert(0, str(Var_start_x))
+    #     entry_end_x_3D.insert(0, str(Var_end_x))
+    # entry_start_z_3D.insert(0, str(start_z))
+    # entry_end_z_3D.insert(0, str(end_z))
+
 # === GUI ===
 root = tk.Tk()
 root.title("Mini G-Code Sender")
-root.geometry("650x450")  # Breiter wegen neuem Bereich
+# root.geometry("650x650")  # Breiter wegen neuem Bereich
 
 vcmd = (root.register(validate_int), '%P')  # Validator für Eingabefelder
 vIP = (root.register(validate_ip), '%P')  # Validator für IP-Adressen)
@@ -344,24 +440,18 @@ left_frame.grid(row=0, column=0, padx=(0, 20))
 step = 1.0
 
 # COM Port
-# Dropdown-Menü (Combobox)
-combobox = ttk.Combobox(left_frame, values=com_ports, state="readonly", width=10)
+combobox = ttk.Combobox(left_frame, values=com_ports, state="readonly", width=10, postcommand=update_com_ports)
 combobox.grid(row=1, column=0, pady=(0, 0))
-# combobox.pack(pady=5)
 combobox.bind("<<ComboboxSelected>>", on_com_select)
 
 # Optional: Standardauswahl
 if com_ports:
     combobox.current(0)
 
-# entry_com = tk.Entry(left_frame, validate="key", validatecommand=vcmd, justify="left")
-# entry_com.grid(row=1, column=0, pady=(0, 0))
-# entry_com.insert(0, 'COM3')
-
 # Verbindung starten/ stoppen
 port = str(combobox.get())
-if port == '':
-    port = "COM3"
+# if port == '':
+#     port = "COM3"
 btn_connecting = tk.Button(left_frame, text="Verbinden", command=lambda: connecting(port), width=10, height=2)
 btn_connecting.config(text="Verbinden", bg="green")
 btn_connecting.grid(row=0, column=0)
@@ -412,6 +502,45 @@ line.grid(row=0, column=1, sticky="ns", padx=10)
 right_frame = tk.Frame(main_frame)
 right_frame.grid(row=0, column=2, sticky="n")
 
+top_right_frame = tk.Frame(right_frame)
+top_right_frame.grid(row=0, sticky="n")
+
+btn_PLL = tk.Button(top_right_frame, text="PLL starten", command=starte_pll, bg="green", fg="white", height=2)
+btn_PLL.grid(row=3, column=0, columnspan=1, pady=(10, 10))
+
+btn_power = tk.Button(top_right_frame, text="Netzteile starten", command=starte_psu, bg="green", fg="white", height=2)
+btn_power.grid(row=3, column=1, columnspan=1, pady=(10, 10))
+
+tk.Label(top_right_frame, text="IP-Address of Oszi:").grid(row=0, column=0, sticky="w")
+entry_IP = tk.Entry(top_right_frame, fg='grey', validate="key", validatecommand=vIP, justify="right")
+entry_IP.grid(row=0, column=1)
+entry_IP.tooltip = ToolTip(entry_IP, f"Default IP: {default_IP}")
+
+button_storage = tk.Button(top_right_frame, text="Speicherordner wählen", command=ordner_waehlen)
+button_storage.grid(row=1, column=0, columnspan=2, pady=(10, 10))
+
+label = tk.Label(top_right_frame, text=f"{storage} (default)", wraplength=250)
+label.grid(row=2, column=0, columnspan=2)
+# Tooltip initialisieren
+label.tooltip = ToolTip(label, "Default folder")
+
+Messungsmethoden = ["Einzelpunktmessung", "Ebenenmessung", "3D-Messung"]
+Messungsmethoden_dropdown = ttk.Combobox(top_right_frame, values=Messungsmethoden, state="readonly", width=20)
+Messungsmethoden_dropdown.grid(row=4, column=0, pady=(10, 10), columnspan=2)
+
+# Optional: Standardauswahl setzen
+Messungsmethoden_dropdown.current(0)
+
+# Ereignis binden
+Messungsmethoden_dropdown.bind("<<ComboboxSelected>>", on_dropdown_change)
+
+# Layout Einzelpunktmessung
+frame_single = tk.Frame(right_frame)
+frame_single.grid(row=1, sticky="n")
+btn_single_meas = tk.Button(frame_single, text="Messung durchführen", command=osz_test, bg="green", fg="white", height=2)
+btn_single_meas.grid(row=0, column=0, columnspan=2, pady=(10, 10))
+
+# Layout Ebenenmessung
 Var_start_x = StringVar()
 Var_start_z = StringVar()
 Var_end_x = StringVar()
@@ -423,52 +552,70 @@ label_z_var = StringVar(value="Measurements in Z: 0")
 for var in [Var_start_x, Var_start_z, Var_end_x, Var_end_z]:
     var.trace_add("write", update_measurements)
 
-# start_x / end_x
-tk.Label(right_frame, text="Start X:").grid(row=4, column=0, sticky="w")
-entry_start_x = tk.Entry(right_frame, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_start_x)
-entry_start_x.grid(row=4, column=1)
+frame_plane = tk.Frame(right_frame)
+frame_plane.grid(row=1, sticky="n")
+# btn_script = tk.Button(frame_plane, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
+# btn_script.grid(row=3, column=0, columnspan=2, pady=(10, 10))
 
-tk.Label(right_frame, text="End X:").grid(row=5, column=0, sticky="w")
-entry_end_x = tk.Entry(right_frame, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_x)
-entry_end_x.grid(row=5, column=1)
+# start_x / end_x
+label_start_x_plane = tk.Label(frame_plane, text="Start X:").grid(row=0, column=0, sticky="w")
+entry_start_x_plane = tk.Entry(frame_plane, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_start_x)
+entry_start_x_plane.grid(row=0, column=1)
+
+label_end_x_plane = tk.Label(frame_plane, text="End X:").grid(row=1, column=0, sticky="w")
+entry_end_x_plane = tk.Entry(frame_plane, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_x)
+entry_end_x_plane.grid(row=1, column=1)
+
+label_steps_x_plane = tk.Label(frame_plane, text=f"Measurements in X: {steps_x}", fg="grey", textvariable=label_x_var)
+label_steps_x_plane.grid(row=2, column=0)
+
+# Layout 3D-Messung
+frame_3D = tk.Frame(right_frame)
+frame_3D.grid(row=1, sticky="n")
+btn_meas_3D = tk.Button(frame_3D, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
+btn_meas_3D.grid(row=6, column=0, columnspan=2, pady=(10, 10))
+
+tk.Label(frame_3D, text="Start X:").grid(row=0, column=0, sticky="w")
+entry_start_x_3D = tk.Entry(frame_3D, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_start_x)
+entry_start_x_3D.grid(row=0, column=1)
+
+tk.Label(frame_3D, text="End X:").grid(row=1, column=0, sticky="w")
+entry_end_x_3D = tk.Entry(frame_3D, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_x)
+entry_end_x_3D.grid(row=1, column=1)
+
+label_steps_x_3D = tk.Label(frame_3D, text=f"Measurements in X: {steps_x}", fg="grey", textvariable=label_x_var)
+label_steps_x_3D.grid(row=2, column=0)
 
 # start_z / end_z
-tk.Label(right_frame, text="Start Z:").grid(row=7, column=0, sticky="w", pady=(20, 0))
-entry_start_z = tk.Entry(right_frame, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_start_z)
-entry_start_z.grid(row=7, column=1, pady=(20, 0))
+tk.Label(frame_3D, text="Start Z:").grid(row=3, column=0, sticky="w", pady=(20, 0))
+entry_start_z_3D = tk.Entry(frame_3D, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_start_z)
+entry_start_z_3D.grid(row=3, column=1, pady=(20, 0))
 
-tk.Label(right_frame, text="End Z:").grid(row=8, column=0, sticky="w")
-entry_end_z = tk.Entry(right_frame, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_z)
-entry_end_z.grid(row=8, column=1)
+tk.Label(frame_3D, text="End Z:").grid(row=4, column=0, sticky="w")
+entry_end_z_3D = tk.Entry(frame_3D, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_z)
+entry_end_z_3D.grid(row=4, column=1)
 
-btn_script = tk.Button(right_frame, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
-btn_script.grid(row=3, column=0, columnspan=1, pady=(10, 10))
+label_steps_y_3D = tk.Label(frame_3D, text=f"Measurements in Z: {steps_y}", fg="grey", textvariable=label_z_var)
+label_steps_y_3D.grid(row=5, column=0)
 
-btn_PLL = tk.Button(right_frame, text="PLL starten", command=starte_pll, bg="green", fg="white", height=2)
-btn_PLL.grid(row=3, column=1, columnspan=1, pady=(10, 10))
+# Dictionary zur Zuordnung
+layouts = {
+    "Einzelpunktmessung": frame_single,
+    "Ebenenmessung": frame_plane,
+    "3D-Messung": frame_3D
+}
 
-tk.Label(right_frame, text="IP-Address of Oszi:").grid(row=0, column=0, sticky="w")
-entry_IP = tk.Entry(right_frame, fg='grey', validate="key", validatecommand=vIP, justify="right")
-entry_IP.grid(row=0, column=1)
-entry_IP.tooltip = ToolTip(entry_IP, f"Default IP: {default_IP}")
+# Start mit erstem Layout
+show_layout("Einzelpunktmessung")
 
-button_storage = tk.Button(right_frame, text="Speicherordner wählen", command=ordner_waehlen)
-button_storage.grid(row=1, column=0, columnspan=2, pady=(10, 10))
-
-label = tk.Label(right_frame, text=f"{storage} (default)", wraplength=250)
-label.grid(row=2, column=0, columnspan=2)
-# Tooltip initialisieren
-label.tooltip = ToolTip(label, "Default folder")
-
-entry_start_x.insert(0, str(start_x))
-entry_end_x.insert(0, str(end_x))
-entry_start_z.insert(0, str(start_z))
-entry_end_z.insert(0, str(end_z))
-
-label_steps_x = tk.Label(right_frame, text=f"Measurements in X: {steps_x}", fg="grey", textvariable=label_x_var)
-label_steps_x.grid(row=6, column=0)
-label_steps_y = tk.Label(right_frame, text=f"Measurements in Z: {steps_y}", fg="grey", textvariable=label_z_var)
-label_steps_y.grid(row=9, column=0)
+if methode_choice == "Ebenenmessung":
+    entry_start_x_plane.insert(0, str(start_x))
+    entry_end_x_plane.insert(0, str(end_x))
+if methode_choice == "3D-Messung":
+    entry_start_x_3D.insert(0, str(start_x))
+    entry_end_x_3D.insert(0, str(end_x))
+entry_start_z_3D.insert(0, str(start_z))
+entry_end_z_3D.insert(0, str(end_z))
 
 entry_feedrate_x.insert(0, str(feed_rate_x))
 entry_feedrate_z.insert(0, str(feed_rate_z))
@@ -488,7 +635,6 @@ console.pack(fill="both", expand=False, padx=10, pady=5)
 # Umleitung aktivieren
 sys.stdout = Redirector(console)
 sys.stderr = Redirector(console)
-
 
 # Event-Handler registrieren
 root.protocol("WM_DELETE_WINDOW", on_close)
