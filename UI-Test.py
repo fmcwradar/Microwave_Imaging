@@ -13,11 +13,12 @@ from tkinter import ttk
 import serial.tools.list_ports
 import subprocess
 import time
-
 import sys
-sys.stdout.reconfigure(line_buffering=True)
 
 from Automatisation_Modul import automatisation
+from osc_test import single_measurement
+
+sys.stdout.reconfigure(line_buffering=True)
 
 class ToolTip:
     def __init__(self, widget, text):
@@ -270,9 +271,9 @@ def starte_script():
         end_z = 0  # oder eine Fehlermeldung anzeigen
 
     print(storage)
-    # automate = automatisation(ser, start_x, end_x, start_z, end_z, storage, IP, feed_rate_x, feed_rate_z)
+    automate = automatisation(ser, start_x, end_x, start_z, end_z, storage, IP, feed_rate_x, feed_rate_z)
     print("Running test automatisation.")
-    # automate.run_automatisation()
+    automate.run_automatisation()
 
 def starte_pll():
     prozess = subprocess.Popen(
@@ -302,9 +303,13 @@ def starte_pll():
 def starte_psu():
     print("Powersupplies are starting.")
 
-def osz_test():
-    # Hier das osz-test Skript adaptiert ausführen
-    print("Single measurement is done.")
+def starte_einzelmessung(ip_address):
+    measurement_name = entry_measurement_name.get()
+    calibration = True
+    VNA = False
+    measurement = single_measurement(ip_address, storage, measurement_name, calibration, VNA)
+    measurement.running()
+
 # === Nur Integer erlauben ===
 def validate_int(text):
     return text == "" or text.isdigit()
@@ -433,6 +438,13 @@ vIP = (root.register(validate_ip), '%P')  # Validator für IP-Adressen)
 main_frame = tk.Frame(root)
 main_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
+main_frame.grid_columnconfigure(0, weight=0)  # frame_left & Konsole
+main_frame.grid_columnconfigure(1, weight=0)  # frame_right
+main_frame.grid_rowconfigure(0, weight=0)     # Obere Zeile
+main_frame.grid_rowconfigure(1, weight=1)     # Konsole soll mitwachsen
+
+root.resizable(width=False, height=True)
+
 # === Linke Seite ===
 left_frame = tk.Frame(main_frame)
 left_frame.grid(row=0, column=0, padx=(0, 20))
@@ -537,8 +549,12 @@ Messungsmethoden_dropdown.bind("<<ComboboxSelected>>", on_dropdown_change)
 # Layout Einzelpunktmessung
 frame_single = tk.Frame(right_frame)
 frame_single.grid(row=1, sticky="n")
-btn_single_meas = tk.Button(frame_single, text="Messung durchführen", command=osz_test, bg="green", fg="white", height=2)
-btn_single_meas.grid(row=0, column=0, columnspan=2, pady=(10, 10))
+label_measurement_name = tk.Label(frame_single, text="Messungsname: ").grid(row=0, column=0, sticky="w")
+entry_measurement_name = tk.Entry(frame_single, validate="key", justify="right")
+entry_measurement_name.grid(row=0, column=1)
+
+btn_single_meas = tk.Button(frame_single, text="Messung durchführen", command=lambda: starte_einzelmessung(ip_address=IP), bg="green", fg="white", height=2)
+btn_single_meas.grid(row=1, column=0, columnspan=2, pady=(10, 10))
 
 # Layout Ebenenmessung
 Var_start_x = StringVar()
@@ -629,8 +645,9 @@ separator = tk.Frame(root, height=2, bg="grey")
 separator.pack(fill="x", padx=10, pady=(5, 0))
 
 # Konsole unten über die ganze Breite
-console = scrolledtext.ScrolledText(root, wrap=tk.WORD, height=8, state="disabled")
-console.pack(fill="both", expand=False, padx=10, pady=5)
+console = scrolledtext.ScrolledText(main_frame, wrap=tk.WORD, height=8, state="disabled")
+console.grid(row=1, column=0, columnspan=3, sticky="nsew")  # Dehnt sich horizontal
+# console.pack(fill="both", expand=False, padx=10, pady=5)
 
 # Umleitung aktivieren
 sys.stdout = Redirector(console)
