@@ -18,18 +18,13 @@ from pathlib import Path
 current_dir = os.path.dirname(__file__)
 #Path in which the .csv-files are located.
 # path_csv = r"{0}\Ideal_Data_Radar".format(current_dir)
-path_csv = r"E:\Measurement_Data_Cache\vollstaendiges-3D-Phantom_mit_unterschiedlich_gefuellten_Bohrungen"
-# path_csv = r"E:\Measurement_Data_Cache\SCHNITT-Phantom-mit-langen-Bohrungen-gefuellt-mit-Wasser"
+# path_csv = r"E:\Measurement_Data_Cache\vollstaendiges-3D-Phantom_mit_unterschiedlich_gefuellten_Bohrungen"
+path_csv = r"C:\Users\mjsch\Desktop\Measurement Data Cache\Messungen_04-06-25\Bohrer_8mm_rechts_04-06-25"
 #Check if all necessary folders exist and if not create them.
 path = pathlib.Path(r'{0}\Pickle_Files'.format(current_dir))
 path.mkdir(parents=True, exist_ok=True)
 
 list_of_measurements = []
-
-# file_names = []
-
-# for number in range(0, number_of_measurements):
-#     file_names.append("0.0_{0}".format(float(10*number)))
 
 def check_folder_contents(folder_path):
     folder_name = pathlib.Path(folder_path)
@@ -82,8 +77,8 @@ total = 8192
 windowing = True
 ideal = False
 swap_IQ = True
-calibration = True
-filtering = True
+calibration = False
+filtering = False
 fc_low = 350e3
 fc_high = 500e3
 filterorder = 10
@@ -92,14 +87,6 @@ background_subtraction = False
 hilbert = False
 offset = 0.935
 #End of define settings.
-
-# list_of_measurements = []
-
-#Iterate over the measurements.
-# for name in tqdm(file_names, desc="Preparing IF data", unit=" files", file=sys.stdout):
-#     single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,filtering,fc_low,fc_high,filterorder,offset,save_last_measurement,background_subtraction,hilbert)
-#     single_measurement.run_radar_evaluation()
-#     list_of_measurements.append(single_measurement)
 
 def main():
     global radar_imaging
@@ -126,46 +113,24 @@ def main():
                     pickle.dump(single_measurement.spectrum_up, file)
                 pbar.update(1)
 
-    # Save the result in .pkl-file and create log-file.
-    # current_dir = os.path.dirname(__file__)
-    # from datetime import datetime
-    # date_today = datetime.today().strftime('%Y-%m-%d')
-    # time_today = datetime.today().strftime('%H-%M-%S')
-    #
-    # path = pathlib.Path(r'{0}\Pickle_Files\{1}_{2}'.format(current_dir, date_today, time_today))
-    # path.mkdir(parents=True, exist_ok=True)
-    # prepared_data_path = pathlib.Path(f"{path}\Prepared_Data")
-    # prepared_data_path.mkdir(parents=True, exist_ok=True)
-    #
-    # for i in range(0, len(list_of_measurements)):
-    #     # Save the individual measurement objects for more efficient memory usage during image calculation
-    #     with open(f"{prepared_data_path}\{list_of_measurements[i].name}.pkl", 'wb') as file:
-    #         # A new file will be created.
-    #         pickle.dump(list_of_measurements[i], file)
-
     #Define settings for Radar_Imaging_Modul.
     distance = single_measurement.distance_corrected
     number_of_points_x = 201
     number_of_points_y = 201
-    number_of_points_z = 201
+    number_of_points_z = 1
     start_x = 0
-    end_x = 45
+    end_x = 50
     start_y = 40
-    end_y = 80
+    end_y = 90
     start_z = 0
-    end_z = 23
+    end_z = 0
 
     antenna_distance = 10
-    # antenna_start = 0
-    # antenna_end = 45
-    # number_of_measurements = 46
-    dynamic_range = 30
-    # image_matrix = np.zeros((number_of_points_z, number_of_points_y, number_of_points_x))
+    dynamic_range = 70
     #End of define settings.
 
     settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,number_of_points_x,number_of_points_y,number_of_points_z,path_csv, path]
 
-    # radar_imaging = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,number_of_points_z,start_x,start_y,start_z,end_x,end_y,end_z,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings)
     radar_imaging = radar_imaging(distance, offset, number_of_points_x, number_of_points_y,
                                   number_of_points_z, start_x, start_y, start_z, end_x, end_y, end_z, antenna_distance,
                                   dynamic_range, settings)

@@ -71,8 +71,10 @@ steps_x = 0
 steps_y = 0
 
 # IP = '169.254.155.204'
-IP = "169.254.25.75"
+# IP = "169.254.25.75"
+IP = "192.168.1.100"
 default_IP = "169.254.25.75"
+# default_IP = "192.168.1.100"
 
 MAX_PATH_LENGTH = 50
 
@@ -112,7 +114,7 @@ if os.path.exists(r'{0}\ui-settings.txt'.format(path)):
                 elif key == 'IP':
                     IP = value
                 elif key == 'Storage':
-                    Storage = value
+                    storage = value
 else:
     print("Datei nicht gefunden.")
     with open(r'{0}\ui-settings.txt'.format(path), 'w') as the_file:
@@ -237,38 +239,33 @@ def move_to(absolut, feed_rate, x_pos, z_pos):
 
 # === Externes Skript starten ===
 def starte_script():
-    global start_x, start_z, end_x, end_z
+    global start_x, start_z, end_x, end_z, methode_choice
     # Messfenster bestimmen
     try:
-        # if methode_choice == "Ebenenmessung":
-        #     start_x = int(entry_start_x_plane.get())
-        # if methode_choice == "3D-Messung":
-        #     start_x = int(entry_start_x_3D.get())
         start_x = Var_start_x
     except ValueError:
         print("Not valid value!")
-        start_x = 0  # oder eine Fehlermeldung anzeigen
+        start_x = 0
     try:
-        # if methode_choice == "Ebenenmessung":
-        #     end_x = int(entry_end_x_plane.get())
-        # if methode_choice == "3D-Messung":
-        #     end_x = int(entry_end_x_3D.get())
         end_x =  Var_end_x
     except ValueError:
         print("Not valid value!")
-        end_x = 0  # oder eine Fehlermeldung anzeigen
-    try:
-        # start_z = int(entry_start_z_3D.get())
-        start_z = Var_start_z
-    except ValueError:
-        print("Not valid value!")
-        start_z = 0  # oder eine Fehlermeldung anzeigen
-    try:
-        # end_z = int(entry_end_z_3D.get())
-        end_z = Var_end_z
-    except ValueError:
-        print("Not valid value!")
-        end_z = 0  # oder eine Fehlermeldung anzeigen
+        end_x = 0
+
+    if methode_choice == "Ebenenmessung":
+        start_z = 0.0
+        end_z = 0.0
+    else:
+        try:
+            start_z = Var_start_z
+        except ValueError:
+            print("Not valid value!")
+            start_z = 0
+        try:
+            end_z = Var_end_z
+        except ValueError:
+            print("Not valid value!")
+            end_z = 0
 
     print(storage)
     automate = automatisation(ser, start_x, end_x, start_z, end_z, storage, IP, feed_rate_x, feed_rate_z)
@@ -286,24 +283,15 @@ def starte_pll():
 
     for line in prozess.stdout:
         print(">>", line.strip())
-    #     read_done = False
-    #     if "r -> read file. Else: -> quit program. Type in: " in line and read_done == False:
-    #         print("-> Eingabe erkannt. Sende 'r'")
-    #         prozess.stdin.write("r\n")
-    #         prozess.stdin.flush()
-    #
-    #     # read_done = True
-    #     # if "r -> read file. Else: -> quit program. Type in: " in line and read_done == True:
-    #     #     print("-> Eingabe erkannt. Sende 'k'")
-    #     #     prozess.stdin.write("k\n")
-    #     #     prozess.stdin.flush()
-    #
-    print("PLL is starting")
+
+    print("PLL is started")
 
 def starte_psu():
     print("Powersupplies are starting.")
 
-def starte_einzelmessung(ip_address):
+def starte_einzelmessung():
+    global storage
+    ip_address = entry_IP.get()
     measurement_name = entry_measurement_name.get()
     calibration = True
     VNA = False
@@ -374,12 +362,8 @@ def on_close():
     print("Fenster wird geschlossen. Speichere Daten oder räume auf...")
     global start_x, end_x
 
-    if methode_choice == "Ebenenmessung":
-        start_x = int(entry_start_x_plane.get())
-        end_x = int(entry_end_x_plane.get())
-    if methode_choice == "3D-Messung":
-        start_x = int(entry_start_x_3D.get())
-        end_x = int(entry_end_x_3D.get())
+    start_x = int(Var_start_x.get())
+    end_x = int(Var_end_x.get())
     start_z = int(entry_start_z_3D.get())
     end_z = int(entry_end_z_3D.get())
     step_size = int(entry_step_size.get())
@@ -417,19 +401,9 @@ def on_dropdown_change(event):
     method_choice = Messungsmethoden_dropdown.get()
     show_layout(method_choice)
 
-    # if methode_choice == "Ebenenmessung":
-    #     entry_start_x_plane.insert(0, str(Var_start_x))
-    #     entry_end_x_plane.insert(0, str(Var_end_x))
-    # if methode_choice == "3D-Messung":
-    #     entry_start_x_3D.insert(0, str(Var_start_x))
-    #     entry_end_x_3D.insert(0, str(Var_end_x))
-    # entry_start_z_3D.insert(0, str(start_z))
-    # entry_end_z_3D.insert(0, str(end_z))
-
 # === GUI ===
 root = tk.Tk()
 root.title("Mini G-Code Sender")
-# root.geometry("650x650")  # Breiter wegen neuem Bereich
 
 vcmd = (root.register(validate_int), '%P')  # Validator für Eingabefelder
 vIP = (root.register(validate_ip), '%P')  # Validator für IP-Adressen)
@@ -456,14 +430,12 @@ combobox = ttk.Combobox(left_frame, values=com_ports, state="readonly", width=10
 combobox.grid(row=1, column=0, pady=(0, 0))
 combobox.bind("<<ComboboxSelected>>", on_com_select)
 
-# Optional: Standardauswahl
+#  COM Standardauswahl
 if com_ports:
     combobox.current(0)
 
 # Verbindung starten/ stoppen
 port = str(combobox.get())
-# if port == '':
-#     port = "COM3"
 btn_connecting = tk.Button(left_frame, text="Verbinden", command=lambda: connecting(port), width=10, height=2)
 btn_connecting.config(text="Verbinden", bg="green")
 btn_connecting.grid(row=0, column=0)
@@ -510,7 +482,7 @@ btn_z_minus.grid(row=3, column=1)
 line = tk.Frame(main_frame, width=2, bg="grey")
 line.grid(row=0, column=1, sticky="ns", padx=10)
 
-# === Rechte Seite: Textfelder ===
+# === Rechte Seite ===
 right_frame = tk.Frame(main_frame)
 right_frame.grid(row=0, column=2, sticky="n")
 
@@ -526,7 +498,7 @@ btn_power.grid(row=3, column=1, columnspan=1, pady=(10, 10))
 tk.Label(top_right_frame, text="IP-Address of Oszi:").grid(row=0, column=0, sticky="w")
 entry_IP = tk.Entry(top_right_frame, fg='grey', validate="key", validatecommand=vIP, justify="right")
 entry_IP.grid(row=0, column=1)
-entry_IP.tooltip = ToolTip(entry_IP, f"Default IP: {default_IP}")
+entry_IP.tooltip = ToolTip(entry_IP, f"Default IP: {IP}")
 
 button_storage = tk.Button(top_right_frame, text="Speicherordner wählen", command=ordner_waehlen)
 button_storage.grid(row=1, column=0, columnspan=2, pady=(10, 10))
@@ -540,7 +512,7 @@ Messungsmethoden = ["Einzelpunktmessung", "Ebenenmessung", "3D-Messung"]
 Messungsmethoden_dropdown = ttk.Combobox(top_right_frame, values=Messungsmethoden, state="readonly", width=20)
 Messungsmethoden_dropdown.grid(row=4, column=0, pady=(10, 10), columnspan=2)
 
-# Optional: Standardauswahl setzen
+# Messmethode Standardauswahl
 Messungsmethoden_dropdown.current(0)
 
 # Ereignis binden
@@ -553,7 +525,7 @@ label_measurement_name = tk.Label(frame_single, text="Messungsname: ").grid(row=
 entry_measurement_name = tk.Entry(frame_single, validate="key", justify="right")
 entry_measurement_name.grid(row=0, column=1)
 
-btn_single_meas = tk.Button(frame_single, text="Messung durchführen", command=lambda: starte_einzelmessung(ip_address=IP), bg="green", fg="white", height=2)
+btn_single_meas = tk.Button(frame_single, text="Messung durchführen", command=starte_einzelmessung, bg="green", fg="white", height=2)
 btn_single_meas.grid(row=1, column=0, columnspan=2, pady=(10, 10))
 
 # Layout Ebenenmessung
@@ -570,8 +542,6 @@ for var in [Var_start_x, Var_start_z, Var_end_x, Var_end_z]:
 
 frame_plane = tk.Frame(right_frame)
 frame_plane.grid(row=1, sticky="n")
-# btn_script = tk.Button(frame_plane, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
-# btn_script.grid(row=3, column=0, columnspan=2, pady=(10, 10))
 
 # start_x / end_x
 label_start_x_plane = tk.Label(frame_plane, text="Start X:").grid(row=0, column=0, sticky="w")
@@ -582,8 +552,14 @@ label_end_x_plane = tk.Label(frame_plane, text="End X:").grid(row=1, column=0, s
 entry_end_x_plane = tk.Entry(frame_plane, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_x)
 entry_end_x_plane.grid(row=1, column=1)
 
+entry_start_x_plane.insert(0, str(start_x))
+entry_end_x_plane.insert(0, str(end_x))
+
 label_steps_x_plane = tk.Label(frame_plane, text=f"Measurements in X: {steps_x}", fg="grey", textvariable=label_x_var)
 label_steps_x_plane.grid(row=2, column=0)
+
+btn_meas_plane = tk.Button(frame_plane, text="Automatisierung starten", command=starte_script, bg="green", fg="white", height=2, wraplength=100)
+btn_meas_plane.grid(row=3, column=0, columnspan=2, pady=(10, 10))
 
 # Layout 3D-Messung
 frame_3D = tk.Frame(right_frame)
@@ -611,6 +587,9 @@ tk.Label(frame_3D, text="End Z:").grid(row=4, column=0, sticky="w")
 entry_end_z_3D = tk.Entry(frame_3D, validate="key", validatecommand=vcmd, justify="right", textvariable=Var_end_z)
 entry_end_z_3D.grid(row=4, column=1)
 
+entry_start_z_3D.insert(0, str(start_z))
+entry_end_z_3D.insert(0, str(end_z))
+
 label_steps_y_3D = tk.Label(frame_3D, text=f"Measurements in Z: {steps_y}", fg="grey", textvariable=label_z_var)
 label_steps_y_3D.grid(row=5, column=0)
 
@@ -623,15 +602,6 @@ layouts = {
 
 # Start mit erstem Layout
 show_layout("Einzelpunktmessung")
-
-if methode_choice == "Ebenenmessung":
-    entry_start_x_plane.insert(0, str(start_x))
-    entry_end_x_plane.insert(0, str(end_x))
-if methode_choice == "3D-Messung":
-    entry_start_x_3D.insert(0, str(start_x))
-    entry_end_x_3D.insert(0, str(end_x))
-entry_start_z_3D.insert(0, str(start_z))
-entry_end_z_3D.insert(0, str(end_z))
 
 entry_feedrate_x.insert(0, str(feed_rate_x))
 entry_feedrate_z.insert(0, str(feed_rate_z))

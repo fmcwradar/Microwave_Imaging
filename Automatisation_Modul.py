@@ -56,10 +56,10 @@ class RTE1054():
 class automatisation:
     def __init__(self, ser, start_x, end_x, start_y, end_y, storage, IP, feed_rate_x, feed_rate_z):
         self.ser = ser
-        self.start_x = start_x
-        self.end_x = end_x
-        self.start_y = start_y
-        self.end_y = end_y
+        self.start_x = int(start_x.get())
+        self.end_x = int(end_x.get())
+        self.start_y = int(start_y.get())
+        self.end_y = int(end_y.get())
         self.storage = storage
         self.IP = IP
         self.feed_rate_x = feed_rate_x
@@ -73,10 +73,11 @@ class automatisation:
         print(f"\tGRBL Response: {response}")
         return response
 
-    # Example: Unlock the GRBL and home the machine
+    # Unlock the GRBL
     def unlock_grbl(self):
         self.send_gcode("$X")  # Unlock GRBL
 
+    # Home the machine
     def home_table(self):
         self.send_gcode("$H")  # Home the machine
 
@@ -98,10 +99,6 @@ class automatisation:
         else:
             set_ref = 91
         self.send_gcode(f"G{set_ref} G1 X{x_pos} Y{y_pos} F{feed_rate}")
-
-        # Update the plot with the new data point
-        # update_plot(current_x_pos, current_y_pos)
-
         self.wait_until_idle()
 
     def setup(self, absolut):
@@ -166,9 +163,6 @@ class automatisation:
         # Format the date and time
         timestamp = now.strftime("%d-%m-%Y_%H-%M-%S")
 
-        # self.feed_rate_x = 200
-        # self.feed_rate_y = 175
-
         steps_x = int(((self.end_x - self.start_x) / 10) + 1)
         steps_y = int(((self.end_y - self.start_y) / 10) + 1)
 
@@ -213,9 +207,6 @@ class automatisation:
             # print("first done.")
             time.sleep(2)
 
-            #send_gcode("$")
-
-
             #initialize oscilloscope class
             if test_run == False:
                 osc = RTE1054(self.IP)
@@ -249,70 +240,46 @@ class automatisation:
                         dataset = np.vstack((time_vector, Data_1, Data_2)).T
 
                         # Write Data to .csv File
-
                         filepath = f"{self.storage}\Measurement Data Cache\\{timestamp}\\{current_y_pos}_{current_x_pos}.csv"
-
                         if os.path.exists(filepath):
                             os.remove(filepath)
                             np.savetxt(filepath, dataset, delimiter=",")
-
                         else:
                             np.savetxt(filepath, dataset, delimiter=",")
-
                         print(f"{current_y_pos}_{current_x_pos} Dataset Saved")
-
                         print("Start Moving the Antennas")
                     if i % 2 == 0:
                         if current_x_pos != self.end_x:
                             current_x_pos += self.step_size_x
-                            # j += 1
-                            # current_x_pos = x_axis[j]
                             print("\tRotating +x ...")
                             # move_to(1, feed_rate_x, current_x_pos, current_y_pos)
                             self.move_to(0, self.feed_rate_x, self.step_size_x, 0)
                             print("\t(current_y_pos, current_x_pos): ", (current_y_pos, current_x_pos))
                             time.sleep(0.5)
-
-                            # Update the plot with the new data point
-                            # update_plot(current_x_pos, current_y_pos)
-
                         else:
                             print("End reached...")
                             if current_y_pos != self.end_y:
-                                # current_x_pos = current_x_pos
                                 print(f"\033[31mLast Position Reached in row {i}.\033[0m")
-
                                 current_y_pos += self.step_size_y
                                 i += 1
-                                # current_y_pos = y_axis[i]
                                 print("\tRotating +y...")
                                 # move_to(1, feed_rate_y, current_x_pos, current_y_pos)
                                 self.move_to(0, self.feed_rate_z, 0, self.step_size_y)
                                 print("(current_y_pos, current_x_pos): ", (current_y_pos, current_x_pos))
                                 time.sleep(0.5)
-
-                                # Update the plot with the new data point
-                                # update_plot(current_x_pos, current_y_pos)
                             else:
                                 print("\033[32mMeasurements done!\033[0m")
-
                     else:
                         if int(current_x_pos) != self.start_x:
-                            # current_x_pos -= step_size_x
                             current_x_pos = x_axis[len(x_axis) - j - 1]
                             print("\tRotating -x...")
                             # move_to(1, feed_rate_x, current_x_pos, current_y_pos)
                             self.move_to(0, self.feed_rate_x, -self.step_size_x, 0)
                             print("\t(current_y_pos, current_x_pos): ", (current_y_pos, current_x_pos))
                             time.sleep(0.5)
-
-                            # Update the plot with the new data point
-                            # update_plot(current_x_pos, current_y_pos)
-
                         elif int(current_x_pos) == self.start_x:
                             if current_y_pos != self.end_y:
                                 print(f"\033[31mLast Position Reached in row {i}.\033[0m")
-                                # current_y_pos += step_size_y
                                 i += 1
                                 current_y_pos = y_axis[i]
                                 print("\tRotating +y...")
@@ -320,9 +287,6 @@ class automatisation:
                                 self.move_to(0, self.feed_rate_z, 0, self.step_size_y)
                                 print("(current_y_pos, current_x_pos): ", (current_y_pos, current_x_pos))
                                 time.sleep(0.5)
-
-                                # Update the plot with the new data point
-                                # update_plot(current_x_pos, current_y_pos)
                             else:
                                 print("\033[32mMeasurements done!\033[0m")
 

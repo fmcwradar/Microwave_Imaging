@@ -55,7 +55,7 @@ class RTE1054():
         self.instr = None
         self.connected = None
         self.resourceStr = 'TCPIP::' + ipV4
-        # self.connect()
+        self.connect()
 
     def connect(self):
         try:
@@ -102,6 +102,7 @@ class single_measurement():
 
     def running(self):
         if self.VNA == False:
+            print(self.ip)
             osc = RTE1054(self.ip)
 
             time.sleep(1)
@@ -126,7 +127,7 @@ class single_measurement():
 
             osc.start_osci(1)
 
-            if self.calitration == True:
+            if self.calibration == True:
                 # Write Data to .csv File
 
                 filepath = f"{self.storage}\Oszi_{self.name}.csv"
