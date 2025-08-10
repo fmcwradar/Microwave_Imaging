@@ -134,7 +134,7 @@ for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit="iterati
     distance_VNA = lengthAxis*2*100-2*offset #In cm. Moreover the offset value is subtracted.
     spectrum_VNA = Stp 
     
-    #Prepare Grid
+    #Prepare grid.
     x_axis = np.linspace(start_x, end_x, number_of_points_x)
     y_axis = np.linspace(start_y, end_y, number_of_points_y)
 
@@ -146,7 +146,7 @@ for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit="iterati
     
     distance_image = distance_a + distance_b
     
-    #Build Interpolator.
+    #Build interpolator.
     f_abs = interpolate.interp1d(distance_VNA, np.abs((spectrum_VNA)), kind = 'cubic')
     f_angle = interpolate.interp1d(distance_VNA, np.unwrap(np.angle((spectrum_VNA))), kind = 'cubic')
     
@@ -216,4 +216,5 @@ with open(r'{0}\Settings.txt'.format(path), 'a') as the_file:
     the_file.write('antenna_end = {0} cm\n'.format(antenna_end))
     the_file.write('Number of points x = {0} \n'.format(number_of_points_x))
     the_file.write('Number of points y = {0} \n'.format(number_of_points_y))
+
     the_file.write('Filepath: {0}\n'.format(filepath))
