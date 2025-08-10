@@ -51,7 +51,7 @@ class radar_imaging:
     def calculate_image(self):
     
         plt.rcParams.update(plt.rcParamsDefault)
-        #Define the offset of the EM waves due to cables, adapters etc. For ideal data the offset is zero.
+        #Subtract offset value from distance vector.
         distance = (self.distance-self.offset)*100
         distance *= 2
         
@@ -62,10 +62,9 @@ class radar_imaging:
         
         self.image_matrix = np.zeros((self.number_of_points_y, self.number_of_points_x), dtype = complex)
         
-        #Start Image Calculation
+        #Start image calculation.
         for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit=" files", file=sys.stdout):
 
-            #Calculate Index Matrix
             x_axis = np.linspace(self.start_x, self.end_x, self.number_of_points_x)
             y_axis = np.linspace(self.start_y, self.end_y, self.number_of_points_y)
 
@@ -79,7 +78,7 @@ class radar_imaging:
             
             spectrum_single_measurement = self.list_of_measurements[counter].spectrum_up
             
-            #Build Interpolator
+            #Build interpolator.
             f_abs = interpolate.interp1d(distance, np.abs((spectrum_single_measurement)), kind = 'cubic')
             f_angle = interpolate.interp1d(distance, np.unwrap(np.angle((spectrum_single_measurement))), kind = 'cubic')
             
@@ -159,4 +158,5 @@ class radar_imaging:
         
     def run_radar_imaging(self):
     
+
         self.calculate_image()
