@@ -51,11 +51,33 @@ list_of_measurements = []
 
 #Iterate over the measurements.
 for name in tqdm(file_names, desc="Preparing IF data", unit="iteration", file=sys.stdout):
-    single_measurement = radar_measurement_evaluation(path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,filtering,fc_low,fc_high,filterorder,offset,save_last_measurement,background_subtraction,hilbert)
+
+    single_measurement = radar_measurement_evaluation(
+    path_csv=path_csv,
+    name=name,
+    B=B,
+    T_c=T_c,
+    c0=c0,
+    number_of_ramps=number_of_ramps,
+    total=total,
+    f0=f0,
+    f1=f1,
+    windowing=windowing,
+    ideal=ideal,
+    swap_IQ=swap_IQ,
+    calibration=calibration,
+    filtering=filtering,
+    fc_low=fc_low,
+    fc_high=fc_high,
+    filterorder=filterorder,
+    distance_offset=offset,
+    save_last_measurement=save_last_measurement,
+    background_subtraction=background_subtraction,
+    hilbert=hilbert)
+    
     single_measurement.run_radar_evaluation()
     list_of_measurements.append(single_measurement)
 
-print(len(list_of_measurements))
 #Define settings for Radar_Imaging_Modul.
 distance = single_measurement.distance_corrected
 number_of_points_x = 401
@@ -78,8 +100,26 @@ image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = comple
 
 settings = [f0,f1,B,np.round(T_c,8),number_of_ramps,total,windowing,calibration,filtering,fc_low,fc_high,filterorder,background_subtraction,hilbert,offset,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,number_of_points_x,number_of_points_y,path_csv]
 
-radar_imaging = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings)
-radar_imaging.run_radar_imaging()
+radar_image = radar_imaging(list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings)
+
+DAS = radar_imaging(
+    list_of_measurements=list_of_measurements,
+    distance=distance,
+    offset=offset,
+    number_of_points_x=number_of_points_x,
+    number_of_points_y=number_of_points_y,
+    start_x=start_x,
+    start_y=start_y,
+    end_x=end_x,
+    end_y=end_y,
+    antenna_distance=antenna_distance,
+    antenna_start=antenna_start,
+    antenna_end=antenna_end,
+    dynamic_range=dynamic_range,
+    number_of_measurements=number_of_measurements,
+    settings=settings)
+
+radar_image.run_radar_imaging()
 
 
 

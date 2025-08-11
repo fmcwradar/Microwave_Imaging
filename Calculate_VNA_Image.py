@@ -57,7 +57,7 @@ c0 = speed_of_light
 #Create empty image matrix.
 image_matrix = np.zeros((number_of_points_y, number_of_points_x), dtype = complex)
 
-#Iterate over antenna positions.
+#Iterate over antenna/measurement positions.
 for antenna_x in tqdm(antenna_positions, desc="Calculating image", unit="iteration"):
 
     #Prepare s-parameter.

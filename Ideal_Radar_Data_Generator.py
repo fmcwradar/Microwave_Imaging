@@ -6,7 +6,7 @@ import os
 import pathlib
 
 #Define targets (x-coordinate, y-coordinate).
-targets = [(20,60),(5,85)]
+targets = [(30,60),(5,85)]
 #Define number of points.
 points = 1000
 #Define bandwidth of the FMCW radar system.
