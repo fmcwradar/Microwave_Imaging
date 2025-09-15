@@ -4,13 +4,26 @@
 
 In this repository, you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency-modulated continuous wave (FMCW) radar system.
 
-The FMCW radar system is realized with commercially available components. More details can be found in my publications (https://ieeexplore.ieee.org/document/10305102) and (https://ieeexplore.ieee.org/document/10590586).
+The FMCW radar system is realized with off-the-shelf components. More details can be found in my publications (https://ieeexplore.ieee.org/document/10305102) and (https://ieeexplore.ieee.org/document/10590586).
 
 As a VNA I used the E8361C from Keysight.
 
 For the imaging with the vector network analyzer, the delay-and-sum (DAS) beamforming algorithm is implemented. For the FMCW radar system the standard matched filter approach is used. However, both approaches are analytically identical.
 
-Much more details can be found in my journal paper, which is available as open access on IEEE Xplore (https://ieeexplore.ieee.org/document/10931040).
+Much more details are presented in my journal paper, which is available as open access on IEEE Xplore (https://ieeexplore.ieee.org/document/10931040).
+
+## General Information
+
+Right now, there are two different version: V01 and V02. The version V01 was used for the comparison of imaging with a VNA and the FMCW radar system. For this purpose, I have developed the two classes "radar_measurement_evaluation" and "radar_imaging". The user has to define the settings in the script `Calculate_Radar_Image.py` by hand.
+
+In the version V02, I expanded the FMCW part of V01 into a Python package called "RSP_Toolbox_MM". It contains the classes "prepare_radar_measurement" and "DAS_imaging". The settings are defined by a file containing the configurations called `Radar_Config.txt`. 
+
+## V02
+
+
+
+
+## V01
 
 ## Imaging with VNA
 
