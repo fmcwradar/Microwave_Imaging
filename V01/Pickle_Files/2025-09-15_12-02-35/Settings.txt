@@ -1,0 +1,25 @@
+f_0 = 6.0 GHz
+f_1 = 14.0 GHz
+B = 8.0 GHz
+T_c = 200.0 µs
+Number of ramps = 100
+Number of points in FFT = 8192
+Windowing = False
+Calibration = False
+Filtering = False
+fc_low = 350.0 kHz
+fc_high = 500.0 kHz
+Filterorder = 10
+Background subtraction = False
+Hilbert = False
+offset = 0
+start_x = 0 cm
+start_y = 40 cm
+end_x = 50 cm
+end_y = 90 cm
+antenna_distance = 10 cm
+antenna_start = 0 cm
+antenna_end = 45 cm
+Number of points x = 401
+Number of points y = 401
+Filepath: c:\Users\Martin\Desktop\Vorbereitung_GitHub\Microwave_Imaging\Microwave_Imaging-main\V01\Ideal_Data_Radar
