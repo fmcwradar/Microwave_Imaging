@@ -14,7 +14,7 @@ Much more details are presented in my journal paper, which is available as open 
 
 ## General Information
 
-Right now, there are two different version: V01 and V02. The version V01 was used for the comparison of imaging with a VNA and the FMCW radar system. For this purpose, I have developed the two classes "radar_measurement_evaluation" and "radar_imaging". The user has to define the settings in the script `Calculate_Radar_Image.py` by hand.
+Right now, there are two different version: V01 and V02. The version V01 was used for the comparison of imaging with a VNA and the FMCW radar system. For this purpose, I have developed the two classes "radar_measurement_evaluation" and "radar_imaging". The user has to define the settings in the script `Calculate_Radar_Image.py` and `Calculate_VNA_Image.py` by hand.
 
 In the version V02, I expanded the FMCW part of V01 into a Python package called "RSP_Toolbox_MM". It contains the classes "prepare_radar_measurement" and "DAS_imaging". The settings are defined by a file containing the configurations called `Radar_Config.txt`. 
 
@@ -24,7 +24,7 @@ For the image generation with the FMCW radar system you have to run the file `Ca
 
 After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. This folder contains the final images a pickle files. Additionally, there is a logfile in which all the used settings are stored. The images is also saved as .png. The path of the image is specified in `Calculate_Radar_Image.py`. 
 
-This file supports multiprocessing. 
+The script `Calculate_Radar_Image.py` supports multiprocessing. 
 
 # V01
 
