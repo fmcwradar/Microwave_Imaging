@@ -20,7 +20,7 @@ In the version V02, I expanded the FMCW part of V01 into a Python package called
 
 # V02
 
-For the image generation with the FMCW radar system you have to run the file `Calculate_Radar_Image.py`. The input data for `Calculate_Radar_Image.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.csv`, `0.0_10.0.csv`, `0.0_20.0.csv` and so on.
+For the image generation with the FMCW radar system, you have to run the file `Calculate_Radar_Image.py`. The input data for `Calculate_Radar_Image.py` are `.csv` files that contain the output data of the radar system that was recorded using an oscilloscope. This includes the time values, the I-part of the IF signal and the Q-part of the IF signal. In the variable 'path' you just have to specfiy the folder with your `.csv` files. The name of the file indicates the measurement position in mm, e.g. `0.0_0.0.csv`, `0.0_10.0.csv`, `0.0_20.0.csv` and so on.
 
 After the calculation of the image is completed, a subfolder is created in the "Pickle_Files" directory. The name of the subfolder is the date and time when the image was completed. This folder contains the final images a pickle files. Additionally, there is a logfile in which all the used settings are stored. The images is also saved as .png. The path of the image is specified in `Calculate_Radar_Image.py`. 
 
@@ -51,7 +51,7 @@ VO1 contains two scripts (`Ideal_VNA_Data_Generator.py` and `Ideal_Radar_Data_Ge
 
 For the generation of the ideal data, the user has to specify an array of (x,y)-coordinates. To compute the ideal FMCW radar signals, the corresponding IF frequency and phase shift based on the ideal signal model is calculated. For the ideal VNA data, a set of microstrip lines with the corresponding lengths is simulated using the `scikit-rf` package.
 
-V01 also contains `Ideal_Radar_Data_Generator.py` that is controlled by the configuration file.
+V02 also contains `Ideal_Radar_Data_Generator.py` that is controlled by the configuration file.
 
 # What else?
 In the folder `Supporting_Material` you can find some more information about the details of the signal processing.
