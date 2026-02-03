@@ -191,20 +191,17 @@ class prepare_radar_measurement:
             IF_I = np.real(mean_value_up_raw)
             
             self.IFsignal = hilbert(IF_I)
-        
-        #Remove DC offset by subtracting the mean value.
-        mean_value_up_raw = self.IFsignal
-        
+                
         #Generate band-pass filter. Use second-order section filter for improved mechanical stability.
         sos = signal.butter(self.filterorder, [self.fc_low,self.fc_high], 'bp', fs=1/self.timestep, output='sos')
                 
         if self.filtering == True:
         
-            filtered_signal = signal.sosfiltfilt(sos, mean_value_up_raw)
+            filtered_signal = signal.sosfiltfilt(sos, self.IFsignal)
         
         if self.filtering == False:
         
-            filtered_signal = mean_value_up_raw
+            filtered_signal = self.IFsignal
                    
         if self.calibration == True:
         
@@ -315,3 +312,4 @@ class prepare_radar_measurement:
         self.collect_ramp_data()
         self.average_data_calculate_FTT()
         
+
