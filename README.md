@@ -8,9 +8,7 @@ The FMCW radar system is realized with off-the-shelf components. More details ca
 
 As a VNA I used the E8361C from Keysight.
 
-For the imaging with the vector network analyzer, the delay-and-sum (DAS) beamforming algorithm is implemented. For the FMCW radar system the standard matched filter approach is used. However, both approaches are analytically identical.
-
-Much more details are presented in my journal paper, which is available as open access on IEEE Xplore (https://ieeexplore.ieee.org/document/10931040).
+For both the FMCW radar and the VNA, delay-and-sum (DAS) beamforming is implemented which correponds to the application of a matched filter. Much more details are presented in my journal paper, which is available as open access on IEEE Xplore (https://ieeexplore.ieee.org/document/10931040).
 
 ## General Information
 
