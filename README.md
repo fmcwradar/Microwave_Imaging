@@ -2,7 +2,7 @@
 
 ![Animated_Measurement](https://github.com/user-attachments/assets/8cbfbf93-13f0-43df-b8c3-7f84ccdb4dc9)
 
-In this repository, you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency-modulated continuous wave (FMCW) radar system.
+In this repository, you can find python scripts for microwave imaging using a vector network analyzer (VNA) and a frequency-modulated continuous wave (FMCW) radar system operating in the frequency range from 6 - 14 GHz.
 
 The FMCW radar system is realized with off-the-shelf components. More details can be found in my publications (https://ieeexplore.ieee.org/document/10305102) and (https://ieeexplore.ieee.org/document/10590586).
 
