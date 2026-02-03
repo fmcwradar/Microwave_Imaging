@@ -30,9 +30,10 @@ class prepare_radar_measurement:
         fc_high: (float) upper cut-off frequency of the band-pass filter.
         filterorder: (int) filteroder of the the band-pass filter.
         distance_offset: (float) distance offset due to cables, adapters etc. (m).
-        save_last_measurement: (boolean) set to "True" to save the last measurement as pickle-file. This is necessary to perform a background subtraction.
+        save_last_measurement: (boolean) set to "True" to save the last measurement as Pickle file. This is necessary to perform a background subtraction.
         background_subtraction: (boolean) set to "True" to perform a background subtraction. It is necessary to first perform a run with save_last_measurement set to "True".
         hilbert: (boolean) set to "True" to only use the measurement data of the I-channel. The corresponding imaginary part is then computed by the Hilbert transform.
+        execution_path: (str) path of the folder that contains the Python file that starts the image calculation.
     """
     
     def __init__(self,path_csv,name,B,T_c,c0,number_of_ramps,total,f0,f1,windowing,ideal,swap_IQ,calibration,filtering,fc_low,fc_high,filterorder,distance_offset,save_last_measurement,background_subtraction,hilbert,execution_path):
@@ -312,4 +313,5 @@ class prepare_radar_measurement:
         self.collect_ramp_data()
         self.average_data_calculate_FTT()
         
+
 
