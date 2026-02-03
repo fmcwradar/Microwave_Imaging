@@ -34,9 +34,18 @@ class DAS_imaging:
         fontsize_mm: (float) fontsize of the image.
         calibration: (bool) provides information if the measurement data was calibrated or not. Relevant for the normalization. 
         path_results: (string) path to the folder in which the results shall be saved.
+        start_x_ROI: (float) start value of the ROI (region of interest) on the x-axis.
+        start_y_ROI: (float) start value of the ROI on the y-axis.
+        end_x_ROI: (float) end value of the ROI on the x-axis.
+        end_y_ROI: (float) end value of the ROI on the y-axis.
+        draw_ROI: (boolean) set to True if you want to draw the ROI in the computed image.
+        vmax: (float) maximum value displayed  in the image. The range of the values displayed in the image is vmax-dynamic_range.
+        normalize: (boolean) set to True if you want to normalize the image to its maximum value. Set to False if you want to normalize it to overall_maximum.
+        overall_maximum: (float) set line above.
+        self.tickstep: (float) tick step of the displayed axes in the image.
     """
 
-    def __init__(self,list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings,fontsize_mm,calibration,background_subtraction,path_results,start_x_ROI,end_x_ROI,start_y_ROI,end_y_ROI,draw_ROI,path_csv,overall_maximum,imagepath,draw_ABC = False, draw_target = False, draw_antenna_coupling = False, draw_modified_background = False, draw_reflector = False, draw_plastic_block = False, draw_ghost_target = False, draw_metal_cylinder = False, draw_walls = False, draw_first_inclusion = False, draw_second_inclusion = False, vmax = 0, normalize = False, tickstep = 10):
+    def __init__(self,list_of_measurements,distance,offset,number_of_points_x,number_of_points_y,start_x,start_y,end_x,end_y,antenna_distance,antenna_start,antenna_end,dynamic_range,number_of_measurements,settings,fontsize_mm,calibration,background_subtraction,path_results,start_x_ROI,end_x_ROI,start_y_ROI,end_y_ROI,draw_ROI,path_csv,overall_maximum,imagepath, vmax = 0, normalize = False, tickstep = 10):
         self.list_of_measurements = list_of_measurements
         self.distance = distance
         self.offset = offset
@@ -228,4 +237,5 @@ class DAS_imaging:
         
     def run_radar_imaging(self):
     
+
         self.calculate_image()
